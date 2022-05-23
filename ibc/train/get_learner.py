@@ -33,6 +33,7 @@ def get_learner(loss_type,
   # Create the policy saver which saves the initial model now, then it
   # periodically checkpoints the policy weights.
   saved_model_dir = os.path.join(root_dir, learner.POLICY_SAVED_MODEL_DIR)
+  print(saved_model_dir)
 
   extra_concrete_functions = []
   # TODO(peteflorence, oars): fix serialization when Policy/Network don't have

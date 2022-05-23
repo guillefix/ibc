@@ -54,7 +54,8 @@ def get_normalizers(train_data,
                     nested_obs=False,
                     nested_actions=False,
                     num_batches=100,
-                    num_samples=None):
+                    num_samples=None,
+                    min_max_actions=False):
   """Computes stats and creates normalizer layers from stats."""
   statistics_dataset = train_data
 
@@ -79,7 +80,8 @@ def get_normalizers(train_data,
            statistics_dataset,
            num_samples=num_samples,
            nested_obs=nested_obs,
-           nested_actions=nested_actions))
+           nested_actions=nested_actions,
+           min_max_actions=min_max_actions))
 
   # Define a function used to normalize training data inside a tf.data .map().
   def norm_train_data_fn(obs_and_act, nothing):

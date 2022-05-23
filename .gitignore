@@ -1,0 +1,7 @@
+**/__pycache__
+videos/*
+train/*
+*.deb
+.idea/*
+ckpt-*
+compiled_jit.pth
