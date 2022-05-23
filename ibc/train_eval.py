@@ -57,7 +57,7 @@ flags.DEFINE_bool('video', False,
                   'If true, write out one rollout video after eval.')
 flags.DEFINE_multi_enum(
     'task', None,
-    (tasks.IBC_TASKS + tasks.D4RL_TASKS),
+    (tasks.IBC_TASKS + tasks.D4RL_TASKS + tasks.LANG_ROBOT_TASKS),
     'If True the reach task is evaluated.')
 flags.DEFINE_boolean('viz_img', default=False,
                      help='Whether to save out imgs of what happened.')
@@ -111,7 +111,8 @@ def train_eval(
     # Use this to sweep amount of tfrecords going into training.
     # -1 for 'use all'.
     max_data_shards=-1,
-    use_warmup=False):
+    use_warmup=False,
+    checkpoint_interval=5000):
   """Trains a BC agent on the given datasets."""
   if task is None:
     raise ValueError('task argument must be set.')
@@ -224,7 +225,8 @@ def train_eval(
         train_step,
         create_train_and_eval_fns,
         fused_train_steps,
-        strategy)
+        strategy,
+        checkpoint_interval=checkpoint_interval)
 
     # Define eval.
     eval_actors, eval_success_metrics = [], []
@@ -393,8 +395,11 @@ def main(_):
       add_time=FLAGS.add_time,
       viz_img=FLAGS.viz_img,
       skip_eval=FLAGS.skip_eval,
+      learning_rate=1e-4,
       shared_memory_eval=FLAGS.shared_memory_eval,
-      strategy=strategy)
+      strategy=strategy,
+      eval_interval=100,
+      checkpoint_interval=100)
 
 
 if __name__ == '__main__':

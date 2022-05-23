@@ -1,0 +1,10 @@
+**/__pycache__
+videos/*
+train/*
+data/*
+*.deb
+.idea/*
+ckpt-*
+compiled_jit.pth
+policies/*
+

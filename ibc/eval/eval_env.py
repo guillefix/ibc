@@ -21,6 +21,8 @@ from absl import flags
 from ibc.environments.block_pushing import block_pushing
 from ibc.environments.block_pushing import block_pushing_discontinuous
 from ibc.environments.block_pushing import block_pushing_multimodal
+from ibc.environments.lang_robot import lang_robot
+from ibc.environments.lang_robot.lang_robot import LangRobotEnv
 from ibc.ibc import tasks
 try:
   from ibc.ibc.eval import d4rl_utils  # pylint: disable=g-import-not-at-top
@@ -39,7 +41,9 @@ FLAGS = flags.FLAGS
 
 def get_env_name(task, shared_memory_eval, use_image_obs=False):
   """Returns environment name for a given task."""
-  if task in ['REACH', 'PUSH', 'INSERT', 'REACH_NORMALIZED', 'PUSH_NORMALIZED']:
+  if task in ['LANG_ROBOT']:
+    env_name = lang_robot.build_env_name(task)
+  elif task in ['REACH', 'PUSH', 'INSERT', 'REACH_NORMALIZED', 'PUSH_NORMALIZED']:
     env_name = block_pushing.build_env_name(
         task, shared_memory_eval, use_image_obs=use_image_obs)
   elif task in ['PUSH_DISCONTINUOUS']:
@@ -60,10 +64,17 @@ def get_env_name(task, shared_memory_eval, use_image_obs=False):
   return env_name
 
 
+def custom_env_loader(env_name):
+  if env_name == "lang_robot":
+    return LangRobotEnv
+
+
 def get_eval_env(env_name, sequence_length, goal_tolerance, num_envs):
   """Returns an eval environment for the given task."""
   if env_name in tasks.D4RL_TASKS:
     load_env_fn = d4rl_utils.load_d4rl
+  # elif env_name in ["lang_robot"]:
+  #     load_env_fn = custom_env_loader
   else:
     load_env_fn = suite_gym.load
 
