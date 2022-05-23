@@ -2,12 +2,26 @@ import pybullet as p
 import numpy as np
 import os
 os.chdir('/home/guillefix/code/')
-human_data = np.load("/home/guillefix/code/inria/UR5/Guillermo/obs_act_etc/11/data.npz", allow_pickle=True)
+human_data = np.load("/home/guillefix/code/inria/UR5/Guillermo/obs_act_etc/8/data.npz", allow_pickle=True)
 from sentence_transformers import SentenceTransformer
+import json
+# vocab = json.loads(open("/home/guillefix/code/inria/UR5_processed/acts.npy.annotation.class_index.json","r").read())
+vocab = json.loads(open("/home/guillefix/code/inria/UR5_processed/acts.npy.annotation.class_index_reverse.json","r").read())
+vocab['66'] = ''
+root_folder = "/home/guillefix/code/inria/UR5_processed/"
+filename="UR5_Guillermo_obs_act_etc_8_data"
+disc_cond = np.load(root_folder+filename+".disc_cond.npy")
+sents = [vocab[str(int(x))] for x in disc_cond]
+sent1 = " ".join(filter(lambda x: x!='', sents[:11]))
+sent2 = " ".join(filter(lambda x: x!='', sents[11:]))
+# with open(root_folder+filename+".annotation.txt","r") as f:
+#     annotation = f.read()
 model = SentenceTransformer('all-MiniLM-L6-v2')
-annotation = human_data['goal_str'][0]
-annotation = "Put white banana on the shelf"
-annotation_emb = model.encode(annotation)
+sentence_embeddings = model.encode([sent1,sent2])
+sentence_embedding1, sentence_embedding2 = sentence_embeddings[0], sentence_embeddings[1]
+ann_emb1 = sentence_embedding1
+ann_emb2 = sentence_embedding2
+annotation_emb = np.concatenate([ann_emb1, ann_emb2])
 np.save("annotation_emb.npy", annotation_emb)
 # annotation_emb = np.load("annotation_emb.npy")
 
@@ -21,7 +35,8 @@ from ibc.ibc.agents.ibc_policy import MappedCategorical
 
 # policy = tf.compat.v2.saved_model.load('/tmp/ibc_logs/mlp_ebm/ibc_dfo/20220215-150051/policies/policy/')
 # policy = tf.compat.v2.saved_model.load('/home/guillefix/code/ibc/policies/20220218-195350/policy/')
-policy = tf.compat.v2.saved_model.load('/home/guillefix/code/ibc/policies/20220223-033003/policies/policy/')
+# policy = tf.compat.v2.saved_model.load('/home/guillefix/code/ibc/policies/20220223-033003/policies/policy/')
+policy = tf.compat.v2.saved_model.load('/home/guillefix/code/ibc_policies/20220308-002340/policies/policy/')
 
 task = "LANG_ROBOT"
 shared_memory_eval=False
@@ -117,8 +132,7 @@ for i in range(1000):
     action_step = policy.action(time_step, policy_state)
     # next_time_step = env.step(action)
     # next_time_step = video_env.step(action)
-    acts = action_step.action.numpy().tolist()[0]
-    action = [acts[0],acts[1],acts[2]] + list(p.getEulerFromQuaternion(acts[3:7])) + [acts[7]]
+    action = np.array(action_step.action.numpy().tolist()[0])
     print(action)
     next_time_step = env.step(action)
     # traj = trajectory.from_transition(time_step, action_step, next_time_step)

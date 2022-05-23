@@ -33,6 +33,35 @@ def build_env_name(task):
     """Construct the env name from parameters."""
     return "LangRobot-v0"
 
+def one_hot(x,n):
+    a = np.zeros(n)
+    a[x]=1
+    return a
+
+color_list = ['yellow', 'magenta', 'blue', 'green', 'red', 'cyan', 'black', 'white']
+from src.envs.color_generation import infer_color
+
+def fix_quaternions(rot_stream):
+    prev_rot = None
+    for i, rot in enumerate(rot_stream):
+        if prev_rot is None:
+            prev_rot = rot
+        if np.any(np.abs(rot-prev_rot) >= prev_rot):
+            rot_stream[i:] = -rot_stream[i:]
+
+    return rot_stream
+
+def process_obs(obs):
+    obs_color1 = obs[37:40].astype(np.float64)
+    obs_color2 = obs[72:75].astype(np.float64)
+    obs_color3 = obs[107:110].astype(np.float64)
+    n=len(color_list)
+    obs_color1 = one_hot(color_list.index(infer_color(obs_color1)),n)
+    obs_color2 = one_hot(color_list.index(infer_color(obs_color2)),n)
+    obs_color3 = one_hot(color_list.index(infer_color(obs_color3)),n)
+    obs_cont = np.concatenate([obs[:14], obs_color1, obs[40:49], obs_color2, obs[75:84], obs_color3, obs[110:]])
+    obs_cont[3:7] = fix_quaternions(obs_cont[3:7])
+    return obs_cont
 import gym
 from gym import spaces
 from gym.envs import registration
@@ -82,8 +111,11 @@ class LangRobotEnv(gym.Env):
         else:
             # print(action)
             # state = env.instance.calc_actor_state()
+            acts = action
+            action = [acts[0],acts[1],acts[2]] + list(p.getEulerFromQuaternion(acts[3:7])) + [acts[7]]
             obs, r, done, info = env.step(np.array(action))
 
+        obs = process_obs(obs)
         observation = collections.OrderedDict(
             obs=obs,
             annotation_emb=self.annotation_emb
