@@ -402,8 +402,8 @@ def main(_):
       shared_memory_eval=FLAGS.shared_memory_eval,
       strategy=strategy,
       eval_interval=100,
-      # checkpoint_interval=100)
-      checkpoint_interval=1)
+      checkpoint_interval=100)
+      # checkpoint_interval=1)
 
 
 if __name__ == '__main__':
