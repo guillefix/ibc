@@ -39,6 +39,9 @@ from ibc.ibc.train import get_normalizers as normalizers_module
 from ibc.ibc.train import get_sampling_spec as sampling_spec_module
 from ibc.ibc.utils import make_video as video_module
 import tensorflow as tf
+gpus = tf.config.experimental.list_physical_devices('GPU')
+for gpu in gpus:
+  tf.config.experimental.set_memory_growth(gpu, True)
 from tf_agents.system import system_multiprocessing as multiprocessing
 from tf_agents.train.utils import spec_utils
 from tf_agents.train.utils import strategy_utils
@@ -399,7 +402,8 @@ def main(_):
       shared_memory_eval=FLAGS.shared_memory_eval,
       strategy=strategy,
       eval_interval=100,
-      checkpoint_interval=100)
+      # checkpoint_interval=100)
+      checkpoint_interval=1)
 
 
 if __name__ == '__main__':

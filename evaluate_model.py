@@ -3,26 +3,26 @@ import numpy as np
 import os
 os.chdir('/home/guillefix/code/')
 human_data = np.load("/home/guillefix/code/inria/UR5/Guillermo/obs_act_etc/8/data.npz", allow_pickle=True)
-from sentence_transformers import SentenceTransformer
+# from sentence_transformers import SentenceTransformer
 import json
 # vocab = json.loads(open("/home/guillefix/code/inria/UR5_processed/acts.npy.annotation.class_index.json","r").read())
-vocab = json.loads(open("/home/guillefix/code/inria/UR5_processed/acts.npy.annotation.class_index_reverse.json","r").read())
-vocab['66'] = ''
-root_folder = "/home/guillefix/code/inria/UR5_processed/"
-filename="UR5_Guillermo_obs_act_etc_8_data"
-disc_cond = np.load(root_folder+filename+".disc_cond.npy")
-sents = [vocab[str(int(x))] for x in disc_cond]
-sent1 = " ".join(filter(lambda x: x!='', sents[:11]))
-sent2 = " ".join(filter(lambda x: x!='', sents[11:]))
+vocab = json.loads(open("/home/guillefix/code/inria/UR5_processed/npz.annotation.txt.annotation.class_index_reverse.json","r").read())
+# vocab['66'] = ''
+# root_folder = "/home/guillefix/code/inria/UR5_processed/"
+# filename="UR5_Guillermo_obs_act_etc_8_data"
+# disc_cond = np.load(root_folder+filename+".disc_cond.npy")
+# sents = [vocab[str(int(x))] for x in disc_cond]
+# sent1 = " ".join(filter(lambda x: x!='', sents[:11]))
+# sent2 = " ".join(filter(lambda x: x!='', sents[11:]))
 # with open(root_folder+filename+".annotation.txt","r") as f:
 #     annotation = f.read()
-model = SentenceTransformer('all-MiniLM-L6-v2')
-sentence_embeddings = model.encode([sent1,sent2])
-sentence_embedding1, sentence_embedding2 = sentence_embeddings[0], sentence_embeddings[1]
-ann_emb1 = sentence_embedding1
-ann_emb2 = sentence_embedding2
-annotation_emb = np.concatenate([ann_emb1, ann_emb2])
-np.save("annotation_emb.npy", annotation_emb)
+# model = SentenceTransformer('all-MiniLM-L6-v2')
+# sentence_embeddings = model.encode([sent1,sent2])
+# sentence_embedding1, sentence_embedding2 = sentence_embeddings[0], sentence_embeddings[1]
+# ann_emb1 = sentence_embedding1
+# ann_emb2 = sentence_embedding2
+# annotation_emb = np.concatenate([ann_emb1, ann_emb2])
+# np.save("annotation_emb.npy", annotation_emb)
 # annotation_emb = np.load("annotation_emb.npy")
 
 from tf_agents.environments import suite_gym
@@ -30,13 +30,17 @@ from tf_agents.environments import suite_gym
 from ibc.environments.lang_robot import lang_robot
 
 import tensorflow as tf
+gpus = tf.config.experimental.list_physical_devices('GPU')
+for gpu in gpus:
+  tf.config.experimental.set_memory_growth(gpu, True)
 
 from ibc.ibc.agents.ibc_policy import MappedCategorical
 
 # policy = tf.compat.v2.saved_model.load('/tmp/ibc_logs/mlp_ebm/ibc_dfo/20220215-150051/policies/policy/')
 # policy = tf.compat.v2.saved_model.load('/home/guillefix/code/ibc/policies/20220218-195350/policy/')
 # policy = tf.compat.v2.saved_model.load('/home/guillefix/code/ibc/policies/20220223-033003/policies/policy/')
-policy = tf.compat.v2.saved_model.load('/home/guillefix/code/ibc_policies/20220308-002340/policies/policy/')
+# policy = tf.compat.v2.saved_model.load('/home/guillefix/code/ibc_policies/20220308-002340/policies/policy/')
+policy = tf.compat.v2.saved_model.load('/home/guillefix/code/ibc_logs/mlp_ebm/ibc_dfo/20220524-013833/policies/policy/')
 
 task = "LANG_ROBOT"
 shared_memory_eval=False
@@ -112,13 +116,16 @@ import tf_agents
 
 # env.action_space.high.shape
 # env._env._env._gym_env.env.env.action_space.low.shape
-env._env._env._gym_env.env.annotation_emb = annotation_emb
-env._env._env._gym_env.env.ex_data = human_data
+# env._env._env._gym_env.env.annotation_emb = annotation_emb
+# env._env._env._gym_env.env.ex_data = human_data
+env._env._env._gym_env.env.render()
 time_step = env.reset()
 time_step = tf_agents.trajectories.time_step.TimeStep(step_type=tf.expand_dims(time_step.step_type,0), reward=tf.expand_dims(time_step.reward,0),
                                           discount=tf.expand_dims(time_step.discount,0),
-                                          observation={'obs':tf.expand_dims(time_step.observation['obs'],0), 'annotation_emb':tf.expand_dims(time_step.observation['annotation_emb'],0)})
+                                          observation={'obs':tf.expand_dims(time_step.observation['obs'],0), 'annotation_emb':tf.expand_dims(time_step.observation['annotation_emb'],0), 'act':tf.expand_dims(time_step.observation['act'],0)})
 
+# env.render()
+# env._env._env._gym_env.env.observation_space[1]
 #%%
 # env._env._env._gym_env.env.action_space
 
@@ -132,7 +139,7 @@ for i in range(1000):
     action_step = policy.action(time_step, policy_state)
     # next_time_step = env.step(action)
     # next_time_step = video_env.step(action)
-    action = np.array(action_step.action.numpy().tolist()[0])
+    action = np.array(action_step.action.numpy().tolist())
     print(action)
     next_time_step = env.step(action)
     # traj = trajectory.from_transition(time_step, action_step, next_time_step)
@@ -141,7 +148,7 @@ for i in range(1000):
     time_step = next_time_step
     time_step = tf_agents.trajectories.time_step.TimeStep(step_type=tf.expand_dims(time_step.step_type,0), reward=tf.expand_dims(time_step.reward,0),
                                               discount=tf.expand_dims(time_step.discount,0),
-                                              observation={'obs':tf.expand_dims(time_step.observation['obs'],0), 'annotation_emb':tf.expand_dims(time_step.observation['annotation_emb'],0)})
+                                              observation={'obs':tf.expand_dims(time_step.observation['obs'],0), 'annotation_emb':tf.expand_dims(time_step.observation['annotation_emb'],0), 'act':tf.expand_dims(time_step.observation['act'],0)})
     # print(time_step)
 
 video_env.close()
