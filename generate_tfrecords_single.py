@@ -1,6 +1,6 @@
 import tensorflow as tf
-physical_devices = tf.config.list_physical_devices('GPU')
-tf.config.experimental.set_memory_growth(physical_devices[0], True)
+# physical_devices = tf.config.list_physical_devices('GPU')
+# tf.config.experimental.set_memory_growth(physical_devices[0], True)
 from tf_agents.utils import example_encoding
 
 
@@ -150,7 +150,7 @@ serialized_features_dataset = tf.data.Dataset.from_generator(
 from tf_agents.utils import example_encoding_dataset
 import pickle
 num_shards = 10
-for i in range(0,1):
+for i in range(0,num_shards):
     dataset_shard = serialized_features_dataset.shard(num_shards=num_shards, index=i)
     filename = 'data/UR5_single/tw_data_'+str(i)+'.tfrecord'
     spec_filename = filename + ".spec"
@@ -171,48 +171,48 @@ for i in range(0,1):
 
 #%%
 ### Process some existing dataset
-
-import glob
-# dataset_name = "block_push_states_location"
-dataset_name = "UR5_single"
-path_to_shards=glob.glob("data/"+dataset_name+"/*tfrecord")
-dataset = tf.data.Dataset.from_tensor_slices(path_to_shards).repeat()
-
-
-buffer_size_per_shard = 100
-seq_len = 1
-def interleave_func(shard):
-    dataset = tf.data.TFRecordDataset(
-        shard, buffer_size=buffer_size_per_shard).cache().repeat()
-    dataset = dataset.window(seq_len, shift=1, stride=1, drop_remainder=True)
-    return dataset.flat_map(
-        lambda window: window.batch(seq_len, drop_remainder=True))
-dataset = dataset.interleave(interleave_func,
-                           deterministic=True,
-                           cycle_length=len(path_to_shards),
-                           block_length=1,
-                           num_parallel_calls=1)
-
-from tf_agents.utils import example_encoding_dataset
-from tf_agents.utils import example_encoding
-specs = []
-for dataset_file in path_to_shards:
-    spec_path = dataset_file + example_encoding_dataset._SPEC_FILE_EXTENSION
-    dataset_spec = example_encoding_dataset.parse_encoded_spec_from_file(
-        spec_path)
-    specs.append(dataset_spec)
-    if not all([dataset_spec == spec for spec in specs]):
-        raise ValueError('One or more of the encoding specs do not match.')
-
-decoder = example_encoding.get_example_decoder(specs[0], batched=True,
-                                             compress_image=True)
-
-decoder
-dataset = dataset.map(decoder, num_parallel_calls=1)
-
-data_iter = iter(dataset)
-
-traj = next(data_iter)
-traj
-traj.observation
-tf.nest.flatten(traj.observation)
+#
+# import glob
+# # dataset_name = "block_push_states_location"
+# dataset_name = "UR5_single"
+# path_to_shards=glob.glob("data/"+dataset_name+"/*tfrecord")
+# dataset = tf.data.Dataset.from_tensor_slices(path_to_shards).repeat()
+#
+#
+# buffer_size_per_shard = 100
+# seq_len = 1
+# def interleave_func(shard):
+#     dataset = tf.data.TFRecordDataset(
+#         shard, buffer_size=buffer_size_per_shard).cache().repeat()
+#     dataset = dataset.window(seq_len, shift=1, stride=1, drop_remainder=True)
+#     return dataset.flat_map(
+#         lambda window: window.batch(seq_len, drop_remainder=True))
+# dataset = dataset.interleave(interleave_func,
+#                            deterministic=True,
+#                            cycle_length=len(path_to_shards),
+#                            block_length=1,
+#                            num_parallel_calls=1)
+#
+# from tf_agents.utils import example_encoding_dataset
+# from tf_agents.utils import example_encoding
+# specs = []
+# for dataset_file in path_to_shards:
+#     spec_path = dataset_file + example_encoding_dataset._SPEC_FILE_EXTENSION
+#     dataset_spec = example_encoding_dataset.parse_encoded_spec_from_file(
+#         spec_path)
+#     specs.append(dataset_spec)
+#     if not all([dataset_spec == spec for spec in specs]):
+#         raise ValueError('One or more of the encoding specs do not match.')
+#
+# decoder = example_encoding.get_example_decoder(specs[0], batched=True,
+#                                              compress_image=True)
+#
+# decoder
+# dataset = dataset.map(decoder, num_parallel_calls=1)
+#
+# data_iter = iter(dataset)
+#
+# traj = next(data_iter)
+# traj
+# traj.observation
+# tf.nest.flatten(traj.observation)

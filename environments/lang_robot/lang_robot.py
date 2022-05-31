@@ -64,7 +64,8 @@ class LangRobotEnv(ExtendedUR5PlayAbsRPY1Obj):
     def reset(self, **kwargs):
         obs = super().reset(**kwargs)
         # print(self.goal_str)
-        ann_emb = model.encode(self.goal_str)
+        sent = " ".join([vocab[str(int(x))] for x in self.tokens[0][0]])
+        ann_emb = model.encode(sent)
         self.annotation_emb = ann_emb
         observation = collections.OrderedDict(
             obs=self.observation_space["obs"].sample(),
