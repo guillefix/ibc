@@ -1,7 +1,7 @@
 import sys
 from os.path import dirname
-root_dir = "/home/guillefix/code/inria/RobotLangEnv/"
-# root_dir = "/gpfswork/rech/imi/usc19dv/captionRLenv/"
+#root_dir = "/home/guillefix/code/inria/RobotLangEnv/"
+root_dir = "/gpfswork/rech/imi/usc19dv/captionRLenv/"
 sys.path.append(root_dir)
 
 import pickle

@@ -15,6 +15,8 @@
 
 """Main binary to train a Behavioral Cloning agent."""
 #  pylint: disable=g-long-lambda
+import os
+os.environ['OPENBLAS_NUM_THREADS'] = '1'
 import collections
 import datetime
 import functools
