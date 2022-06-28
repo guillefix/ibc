@@ -40,7 +40,12 @@ from ibc.ibc.agents.ibc_policy import MappedCategorical
 # policy = tf.compat.v2.saved_model.load('/home/guillefix/code/ibc/policies/20220218-195350/policy/')
 # policy = tf.compat.v2.saved_model.load('/home/guillefix/code/ibc/policies/20220223-033003/policies/policy/')
 # policy = tf.compat.v2.saved_model.load('/home/guillefix/code/ibc_policies/20220308-002340/policies/policy/')
-policy = tf.compat.v2.saved_model.load('/home/guillefix/code/ibc_logs/mlp_ebm/ibc_dfo/20220524-013833/policies/policy/')
+# policy = tf.compat.v2.saved_model.load('/home/guillefix/code/ibc_logs/mlp_ebm/ibc_dfo/20220524-013833/policies/policy/')
+# policy = tf.compat.v2.saved_model.load('/home/guillefix/code/ibc_logs/mlp_ebm/ibc_dfo/20220602-063734/policies/policy/')
+# policy = tf.compat.v2.saved_model.load('/home/guillefix/code/ibc_logs/mlp_ebm/ibc_dfo/20220603-060321/policies/policy/')
+# policy = tf.compat.v2.saved_model.load('/home/guillefix/code/ibc_logs/mlp_ebm/ibc_dfo/20220603-230841/policies/policy/')
+#policy = tf.compat.v2.saved_model.load('/home/guillefix/code/ibc_logs/mlp_ebm/ibc_dfo/20220606-232320/policies/policy/')
+policy = tf.compat.v2.saved_model.load('/home/guillefix/code/ibc_logs/mlp_ebm/ibc_dfo/20220609-001705/policies/policy/')
 
 task = "LANG_ROBOT"
 shared_memory_eval=False
@@ -120,6 +125,8 @@ import tf_agents
 # env._env._env._gym_env.env.ex_data = human_data
 env._env._env._gym_env.env.render()
 time_step = env.reset()
+#env._env._env._gym_env.env.reset(description="Paint green dog red")
+env._env._env._gym_env.env.reset(description="Put green dog on the shelf")
 time_step = tf_agents.trajectories.time_step.TimeStep(step_type=tf.expand_dims(time_step.step_type,0), reward=tf.expand_dims(time_step.reward,0),
                                           discount=tf.expand_dims(time_step.discount,0),
                                           observation={'obs':tf.expand_dims(time_step.observation['obs'],0), 'annotation_emb':tf.expand_dims(time_step.observation['annotation_emb'],0), 'act':tf.expand_dims(time_step.observation['act'],0)})
