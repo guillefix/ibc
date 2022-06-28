@@ -2,7 +2,7 @@
 
 python3 ibc/ibc/train_eval.py -- \
   --alsologtostderr \
-  --gin_file=ibc/ibc/configs/pushing_states/mlp_ebm.gin \
+  --gin_file=ibc/ibc/configs/pushing_states/mlp_ebm_best2.gin \
   --task=LANG_ROBOT \
   --tag=ibc_dfo \
   --add_time=True \

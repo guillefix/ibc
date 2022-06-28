@@ -24,12 +24,16 @@ import gym
 from gym import spaces
 from gym.envs import registration
 import numpy as np
+from constants import *
 
 import pickle
 obs_mod = "obs_cont_single_nocol_noarm_incsize_trim_scaled"
 acts_mod = "acts_trim_scaled"
 obs_scaler = pickle.load(open(processed_data_folder+obs_mod+"_scaler.pkl", "rb"))
 acts_scaler = pickle.load(open(processed_data_folder+acts_mod+"_scaler.pkl", "rb"))
+vocab = json.loads(open(processed_data_folder+"npz.annotation.txt.annotation.class_index_reverse.json","r").read())
+vocab['72'] = ''
+
 
 
 class LangRobotEnv(ExtendedUR5PlayAbsRPY1Obj):
@@ -64,7 +68,7 @@ class LangRobotEnv(ExtendedUR5PlayAbsRPY1Obj):
     def reset(self, **kwargs):
         obs = super().reset(**kwargs)
         # print(self.goal_str)
-        sent = " ".join([vocab[str(int(x))] for x in self.tokens[0][0]])
+        sent = " ".join([vocab[str(int(x))] for x in self.tokens])
         ann_emb = model.encode(sent)
         self.annotation_emb = ann_emb
         observation = collections.OrderedDict(
