@@ -24,12 +24,16 @@ import gym
 from gym import spaces
 from gym.envs import registration
 import numpy as np
+from constants import *
 
 import pickle
 obs_mod = "obs_cont_single_nocol_noarm_incsize_trim_scaled"
 acts_mod = "acts_trim_scaled"
 obs_scaler = pickle.load(open(processed_data_folder+obs_mod+"_scaler.pkl", "rb"))
 acts_scaler = pickle.load(open(processed_data_folder+acts_mod+"_scaler.pkl", "rb"))
+vocab = json.loads(open(processed_data_folder+"npz.annotation.txt.annotation.class_index_reverse.json","r").read())
+vocab['72'] = ''
+
 
 import json
 # vocab = json.loads(open("/home/guillefix/code/inria/UR5_processed/acts.npy.annotation.class_index.json","r").read())
