@@ -47,6 +47,7 @@ ResNetLayer.normalizer = None
 # Need to not use langevin samples in agent or policy
 ImplicitBCAgent.add_grad_penalty = False
 ImplicitBCAgent.compute_mse = True
-ImplicitBCAgent.fraction_langevin_samples = 0.0
-IbcPolicy.use_langevin = False
-IbcPolicy.use_dfo = True
+ImplicitBCAgent.fraction_dfo_samples = 0.0
+ImplicitBCAgent.fraction_langevin_samples = 1.0
+IbcPolicy.use_langevin = True
+IbcPolicy.use_dfo = False

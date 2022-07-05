@@ -77,12 +77,13 @@ class LangRobotEnv(ExtendedUR5PlayAbsRPY1Obj):
         sent = " ".join([vocab[str(int(x))] for x in self.tokens])
         ann_emb = model.encode(sent)
         self.annotation_emb = ann_emb
+        # import pdb; pdb.set_trace()
         observation = collections.OrderedDict(
             obs=self.observation_space["obs"].sample(),
             annotation_emb=self.annotation_emb,
             act=self.observation_space["act"].sample()
         )
-        # print(observation)
+        print(observation["annotation_emb"].shape)
         return observation
 
     def get_metrics(self, num_episodes):

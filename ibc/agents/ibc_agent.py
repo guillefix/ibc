@@ -139,6 +139,8 @@ class ImplicitBCAgent(base_agent.BehavioralCloningAgent):
     # Observation: [B x T x obs_spec]
     # Action:      [B x act_spec]
     observations, actions = experience
+    # print("WOOOOOOOOOOOOOOOOOOOOOOOO")
+    # print(experience)
 
     # Use first observation to figure out batch/time sizes as they should be the
     # same across all observations.
@@ -201,6 +203,7 @@ class ImplicitBCAgent(base_agent.BehavioralCloningAgent):
           network_inputs = (unused_obs,
                             tf.stop_gradient(combined_true_counter_actions))
           # [B * n+1]
+          # tf.print(obs_embeddings)
           predictions, _ = self.cloning_network(
               network_inputs, training=training,
               observation_encoding=obs_embeddings)
@@ -209,6 +212,7 @@ class ImplicitBCAgent(base_agent.BehavioralCloningAgent):
           network_inputs = (maybe_tiled_obs,
                             tf.stop_gradient(combined_true_counter_actions))
           # [B * n+1]
+          tf.print(maybe_tiled_obs)
           predictions, _ = self.cloning_network(
               network_inputs, training=training)
         # [B, n+1]

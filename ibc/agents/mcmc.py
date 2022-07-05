@@ -102,6 +102,7 @@ def iterative_dfo(network,
     obs_encodings = nest_utils.tile_batch(obs_encodings, num_action_samples)
 
   def update_selected_actions(samples, policy_state):
+    # print("OWOWOWOWOWOW")
     if late_fusion:
       # Repeatedly hand in the precomputed obs encodings.
       net_logits, new_policy_state = network(

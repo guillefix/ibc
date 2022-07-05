@@ -150,6 +150,8 @@ def train_eval(
   obs_tensor_spec, action_tensor_spec, time_step_tensor_spec = (
       spec_utils.get_tensor_specs(eval_envs[0]))
 
+  # print(dataset_path)
+  # import pdb; pdb.set_trace()
   # Compute normalization info from training data.
   create_train_and_eval_fns_unnormalized = data_module.get_data_fns(
       dataset_path,
@@ -189,11 +191,17 @@ def train_eval(
     # Define action sampling spec.
     action_sampling_spec = sampling_spec_module.get_sampling_spec(
         action_tensor_spec,
+        # min_actions=-4,
+        # max_actions=4,
         min_actions=norm_info.min_actions,
         max_actions=norm_info.max_actions,
         uniform_boundary_buffer=uniform_boundary_buffer,
         act_norm_layer=norm_info.act_norm_layer)
 
+
+    # print(norm_info.min_actions)
+    # print(norm_info.max_actions)
+    # import pdb; pdb.set_trace()
     # This is a common opportunity for a bug, having the wrong sampling min/max
     # so log this.
     logging.info(('Using action_sampling_spec:', action_sampling_spec))
@@ -208,6 +216,8 @@ def train_eval(
         sequence_length,
         norm_info.act_denorm_layer)
 
+
+
     # Define tfagent.
     agent = agent_module.get_agent(loss_type,
                                    time_step_tensor_spec,
@@ -221,8 +231,32 @@ def train_eval(
                                    cloning_network,
                                    train_step,
                                    decay_steps)
+    # policy_restore = tf.compat.v2.saved_model.load('/home/guillefix/code/ibc_logs/mlp_ebm/ibc_dfo/20220701-170540/policies/policy/')
+    # cloning_network_restore = policy_restore.cloning_network
+    # import pdb; pdb.set_trace()
+    # restored_vars = cloning_network_restore.trainable_variables
+    # for i,var in enumerate(cloning_network.trainable_variables):
+    #     var = restored_vars[i]
+
+
+    #########
+
+    policy = agent.policy
+    # policy = agent.collect_policy
+
+    from tf_agents.policies import PolicySaver
+    saver = PolicySaver(policy, batch_size=None)
+    # saver.save("awo_testing")
+
+    # from ibc.evaluate_model import run
+    #
+    # run(policy)
+
+    ###########
 
     # Define bc learner.
+    #this is useful for debugging
+    # tf.config.experimental_run_functions_eagerly(True)
     bc_learner = learner_module.get_learner(
         loss_type,
         root_dir,
@@ -266,6 +300,7 @@ def train_eval(
   while train_step.numpy() < num_iterations:
     # Run bc_learner for fused_train_steps.
     training_step(agent, bc_learner, fused_train_steps, train_step)
+    saver.save("awo_testing3")
 
     if (dist_eval_data_iter is not None and
         train_step.numpy() % eval_loss_interval == 0):
@@ -405,6 +440,7 @@ def main(_):
       strategy=strategy,
       eval_interval=100,
       checkpoint_interval=100)
+      # dataset_path=gin.dataset_path)
       # checkpoint_interval=1)
 
 

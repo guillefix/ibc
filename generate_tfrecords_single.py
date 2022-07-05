@@ -69,6 +69,7 @@ model = SentenceTransformer('all-MiniLM-L6-v2')
 
 root_folder = "/home/guillefix/code/inria/UR5_processed/"
 filenames=[x[:-1] for x in open("/home/guillefix/code/inria/UR5_processed/base_filenames_single_objs_filtered.txt","r").readlines()]
+filenames = filenames[:1]
 
 filename = filenames[0]
 import json
@@ -79,8 +80,15 @@ vocab['72'] = ''
 
 def generator():
     for filename in filenames:
-        obss = np.load(root_folder+filename+".obs_cont_single_nocol_noarm_incsize_trim_scaled.npy")
-        actss = np.load(root_folder+filename+".acts_trim_scaled.npy")
+        # n=-1
+        i=0
+        n=50
+        obss = np.load(root_folder+filename+".obs_cont_single_nocol_noarm_incsize_trim_scaled.npy")[i:i+n]
+        actss = np.load(root_folder+filename+".acts_trim_scaled.npy")[i:i+n]
+        # obss = np.load(root_folder+filename+".obs_cont_single_nocol_noarm_incsize_trim_scaled.npy")[0:1]
+        # obss = np.concatenate([obss,np.load(root_folder+filename+".obs_cont_single_nocol_noarm_incsize_trim_scaled.npy")[100:101]])
+        # actss = np.load(root_folder+filename+".acts_trim_scaled.npy")[0:1]
+        # actss = np.concatenate([actss,np.load(root_folder+filename+".acts_trim_scaled.npy")[100:101]])
         disc_cond = np.load(root_folder+filename+".annotation_simp_wnoun.npy")[0]
         # print(disc_cond.shape)
         sent = " ".join([vocab[str(int(x))] for x in disc_cond])
@@ -149,10 +157,13 @@ serialized_features_dataset = tf.data.Dataset.from_generator(
 #%%
 from tf_agents.utils import example_encoding_dataset
 import pickle
-num_shards = 10
+# num_shards = 10
+num_shards = 1
 for i in range(0,num_shards):
     dataset_shard = serialized_features_dataset.shard(num_shards=num_shards, index=i)
-    filename = 'data/UR5_single/tw_data_'+str(i)+'.tfrecord'
+    # filename = 'data/UR5_single/tw_data_'+str(i)+'.tfrecord'
+    # filename = 'data/UR5_single_smol/tw_data_'+str(i)+'.tfrecord'
+    filename = 'data/UR5_single_smollest/tw_data_'+str(i)+'.tfrecord'
     spec_filename = filename + ".spec"
     # example_encoding_dataset.encode_spec_to_file(spec_filename, dataset_shard.element_spec)
     example_encoding_dataset.encode_spec_to_file(spec_filename, output_spec)

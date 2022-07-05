@@ -62,6 +62,7 @@ def get_data_fns(dataset_path,
           (trajectory.observation, trajectory.action[:, -1, Ellipsis]), ()))
 
     if norm_function:
+      # import pdb; pdb.set_trace()
       train_data = train_data.map(norm_function)
       if eval_data:
         eval_data = eval_data.map(norm_function)

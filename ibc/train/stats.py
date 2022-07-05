@@ -199,15 +199,22 @@ def compute_dataset_statistics(dataset, num_samples, nested_obs=True,
   act_norm_layers = []
   act_denorm_layers = []
   for obs_stat in obs_statistics:
+    # obs_norm_layers.append(
+    #     StdNormalizationLayer(mean=obs_stat.mean, std=get(obs_stat.std)))
     obs_norm_layers.append(
-        StdNormalizationLayer(mean=obs_stat.mean, std=get(obs_stat.std)))
+        StdNormalizationLayer(mean=np.zeros_like(obs_stat.mean), std=np.ones_like(get(obs_stat.std))))
 
   for act_stat in act_statistics:
-    if not min_max_actions:
+    # if not min_max_actions:
+    if True:
+      # act_norm_layers.append(
+      #     StdNormalizationLayer(mean=act_stat.mean, std=get(act_stat.std)))
       act_norm_layers.append(
-          StdNormalizationLayer(mean=act_stat.mean, std=get(act_stat.std)))
+          StdNormalizationLayer(mean=np.zeros_like(act_stat.mean), std=np.ones_like(get(act_stat.std))))
+      # act_denorm_layers.append(
+      #     StdDenormalizationLayer(mean=act_stat.mean, std=get(act_stat.std)))
       act_denorm_layers.append(
-          StdDenormalizationLayer(mean=act_stat.mean, std=get(act_stat.std)))
+          StdDenormalizationLayer(mean=np.zeros_like(act_stat.mean), std=np.ones_like(get(act_stat.std))))
     else:
       act_norm_layers.append(
           MinMaxNormalizationLayer(vmin=min_actions[0], vmax=max_actions[0]))
@@ -262,6 +269,7 @@ class StdNormalizationLayer(tf.keras.layers.Layer):
     self._std = std.astype(np.float32)
 
   def __call__(self, vector, **kwargs):
+    # import pdb; pdb.set_trace()
     vector = tf.cast(vector, tf.float32)
     return (vector - self._mean) / tf.maximum(self._std, EPS)
 

@@ -91,12 +91,15 @@ def get_normalizers(train_data,
         obs[img_key] = tf.image.convert_image_dtype(
             obs[img_key], dtype=tf.float32)
     act = obs_and_act[1]
-    normalized_obs = obs_norm_layer(obs)
-    if isinstance(obs_norm_layer, nest_map.NestMap):
-      normalized_obs, _ = normalized_obs
-    normalized_act = act_norm_layer(act)
-    if isinstance(act_norm_layer, nest_map.NestMap):
-      normalized_act, _ = normalized_act
+    # import pdb; pdb.set_trace()
+    # normalized_obs = obs_norm_layer(obs)
+    # if isinstance(obs_norm_layer, nest_map.NestMap):
+    #   normalized_obs, _ = normalized_obs
+    # normalized_act = act_norm_layer(act)
+    # if isinstance(act_norm_layer, nest_map.NestMap):
+    #   normalized_act, _ = normalized_act
+    normalized_obs = obs
+    normalized_act = act
     return ((normalized_obs, normalized_act), nothing)
 
   norm_info = NormalizationInfo(obs_norm_layer,
