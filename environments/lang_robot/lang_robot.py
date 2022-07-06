@@ -1,7 +1,7 @@
 import sys
 from os.path import dirname
-root_dir = "/home/guillefix/code/inria/RobotLangEnv/"
-# root_dir = "/gpfswork/rech/imi/usc19dv/captionRLenv/"
+#root_dir = "/home/guillefix/code/inria/RobotLangEnv/"
+root_dir = "/gpfswork/rech/imi/usc19dv/captionRLenv/"
 sys.path.append(root_dir)
 
 import pickle
@@ -37,7 +37,7 @@ vocab['72'] = ''
 
 import json
 # vocab = json.loads(open("/home/guillefix/code/inria/UR5_processed/acts.npy.annotation.class_index.json","r").read())
-vocab = json.loads(open("/home/guillefix/code/inria/UR5_processed/npz.annotation.txt.annotation.class_index_reverse.json","r").read())
+vocab = json.loads(open(processed_data_folder+"npz.annotation.txt.annotation.class_index_reverse.json","r").read())
 vocab['72'] = ''
 
 

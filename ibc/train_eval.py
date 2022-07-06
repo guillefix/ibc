@@ -447,7 +447,7 @@ def main(_):
       shared_memory_eval=FLAGS.shared_memory_eval,
       strategy=strategy,
       eval_interval=100,
-      FLAGS.continue_train,
+      continue_train=FLAGS.continue_train,
       checkpoint_interval=100)
       # dataset_path=gin.dataset_path)
       # checkpoint_interval=1)

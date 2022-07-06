@@ -212,7 +212,7 @@ class ImplicitBCAgent(base_agent.BehavioralCloningAgent):
           network_inputs = (maybe_tiled_obs,
                             tf.stop_gradient(combined_true_counter_actions))
           # [B * n+1]
-          tf.print(maybe_tiled_obs)
+          #tf.print(maybe_tiled_obs)
           predictions, _ = self.cloning_network(
               network_inputs, training=training)
         # [B, n+1]
