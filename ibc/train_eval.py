@@ -71,6 +71,8 @@ flags.DEFINE_bool('skip_eval', False,
                   'policy_eval binary.')
 flags.DEFINE_bool('multi_gpu', False,
                   'If true, run in multi-gpu setting.')
+flags.DEFINE_bool('continue_train', False,
+                  'If true, restore from checkpoint')
 
 flags.DEFINE_enum('device_type', 'gpu', ['gpu', 'tpu'],
                   'Where to perform training.')
@@ -113,6 +115,8 @@ def train_eval(
     shared_memory_eval=False,
     image_obs=False,
     strategy=None,
+    continue_train=False,
+    continue_train=False,
     # Use this to sweep amount of tfrecords going into training.
     # -1 for 'use all'.
     max_data_shards=-1,
@@ -231,7 +235,6 @@ def train_eval(
                                    cloning_network,
                                    train_step,
                                    decay_steps)
-    # policy_restore = tf.compat.v2.saved_model.load('/home/guillefix/code/ibc_logs/mlp_ebm/ibc_dfo/20220701-170540/policies/policy/')
     # cloning_network_restore = policy_restore.cloning_network
     # import pdb; pdb.set_trace()
     # restored_vars = cloning_network_restore.trainable_variables
@@ -241,7 +244,12 @@ def train_eval(
 
     #########
 
-    policy = agent.policy
+    if continue_train:
+        policy_restore = tf.compat.v2.saved_model.load('awo_testing3')
+        policy = agent.policy
+        restored_vars = {v.name:v.numpy() for v in policy_restore.model_variables}
+        for v in policy.trainable_variables: v = restored_vars[v.name]
+    # import pdb; pdb.set_trace()
     # policy = agent.collect_policy
 
     from tf_agents.policies import PolicySaver
@@ -439,6 +447,7 @@ def main(_):
       shared_memory_eval=FLAGS.shared_memory_eval,
       strategy=strategy,
       eval_interval=100,
+      FLAGS.continue_train,
       checkpoint_interval=100)
       # dataset_path=gin.dataset_path)
       # checkpoint_interval=1)

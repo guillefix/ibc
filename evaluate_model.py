@@ -73,7 +73,7 @@ def run(policy):
     task = "LANG_ROBOT"
     shared_memory_eval=False
     use_image_obs=False
-    sequence_length=2
+    sequence_length=1
     goal_tolerance=0.02
     num_envs=1
 
@@ -143,7 +143,7 @@ def run(policy):
     import tf_agents
 
     # n=2
-    n=1
+    n=sequence_length
 
     # env.action_space.high.shape
     # env._env._env._gym_env.env.env.action_space.low.shape
@@ -222,7 +222,7 @@ def run(policy):
         # traj = trajectory.from_transition(time_step, action_step, next_time_step)
         # metrics[1](traj)
         # policy_state = action_step.state
-        # time_step = next_time_step
+        time_step = next_time_step
         # # time_step.observation['obs'] = traj_data_obss[i:i+n].astype(np.float32)
         # # time_step.observation['act'] = traj_data_actss[i:i+n].astype(np.float32)
         # # time_step.observation['obs'] = traj_data_obss[i%(100-n):i%(100-n)+n].astype(np.float32)
@@ -230,17 +230,19 @@ def run(policy):
         # if (i//20) % 2 == 0: k=0
         # else: k=100
         k=i
-        time_step.observation['obs'] = traj_data_obss[k:k+n].astype(np.float32)
-        time_step.observation['act'] = traj_data_actss[k:k+n].astype(np.float32)
+        # time_step.observation['obs'] = traj_data_obss[k:k+n].astype(np.float32)
+        # time_step.observation['act'] = traj_data_actss[k:k+n].astype(np.float32)
         # # time_step.observation['obs'] = traj_data_obss[0:0+n].astype(np.float32)
         # # time_step.observation['act'] = traj_data_actss[0:0+n].astype(np.float32)
         # print(time_step.observation['annotation_emb'].shape)
-        time_step.observation['annotation_emb'] = time_step.observation['annotation_emb'][0,:1]
+        # time_step.observation['obs'] = time_step.observation['obs'][0,:1]
+        # time_step.observation['act'] = time_step.observation['act'][0,:1]
+        # time_step.observation['annotation_emb'] = time_step.observation['annotation_emb'][0,:1]
         # time_step = tf_agents.trajectories.time_step.TimeStep(step_type=tf.expand_dims(time_step.step_type,0), reward=tf.expand_dims(time_step.reward,0),
         #                                           discount=tf.expand_dims(time_step.discount,0),
         #                                           observation={'obs':tf.expand_dims(time_step.observation['obs'],0), 'annotation_emb':tf.expand_dims(time_step.observation['annotation_emb'],0), 'act':tf.expand_dims(time_step.observation['act'],0)})
-        time_step = tf_agents.trajectories.time_step.TimeStep(step_type=time_step.step_type, reward=time_step.reward,
-                                                  discount=time_step.discount,
+        time_step = tf_agents.trajectories.time_step.TimeStep(step_type=tf.expand_dims(time_step.step_type,0), reward=tf.expand_dims(time_step.reward,0),
+                                                  discount=tf.expand_dims(time_step.discount,0),
                                                   observation={'obs':tf.expand_dims(time_step.observation['obs'],0), 'annotation_emb':tf.expand_dims(time_step.observation['annotation_emb'],0), 'act':tf.expand_dims(time_step.observation['act'],0)})
         print(time_step.observation['obs'])
         print(time_step.observation['act'])
@@ -262,7 +264,7 @@ def run(policy):
 
 
 # policy = tf.compat.v2.saved_model.load('/home/guillefix/code/ibc_logs/mlp_ebm/ibc_dfo/20220704-221712/policies/policy/')
-policy = tf.compat.v2.saved_model.load('/home/guillefix/code/awo_testing2')
+policy = tf.compat.v2.saved_model.load('/home/guillefix/code/awo_testing3')
 # from tf_agents.policies import greedy_policy
 # policy = greedy_policy.GreedyPolicy(policy)
 
