@@ -1,31 +1,35 @@
 import pybullet as p
 import numpy as np
-import os
+import os, sys
 from constants import *
 import tensorflow as tf
 from tf_agents.environments import suite_gym
+from pathlib import Path
 
 from ibc.environments.lang_robot import lang_robot
+print("AWOO")
 
 gpus = tf.config.experimental.list_physical_devices('GPU')
 for gpu in gpus:
   tf.config.experimental.set_memory_growth(gpu, True)
 
 from ibc.ibc.agents.ibc_policy import MappedCategorical
+print("OWAA")
+sys.stdout.flush()
 
 
-def run(policy):
+def run(policy, args):
     os.chdir('/home/guillefix/code/')
     # human_data = np.load("/home/guillefix/code/inria/UR5/Guillermo/obs_act_etc/8/data.npz", allow_pickle=True)
-    session_id = "Guillermo1"
-    rec_id = "626"
-    human_data = np.load("/home/guillefix/code/inria/UR5/"+session_id+"/obs_act_etc/"+rec_id+"/data.npz", allow_pickle=True)
-    traj_data_obss = np.load(processed_data_folder+"UR5_"+session_id+"_obs_act_etc_"+rec_id+"_data.obs_cont_single_nocol_noarm_incsize_trim_scaled.npy")
-    traj_data_actss = np.load(processed_data_folder+"UR5_"+session_id+"_obs_act_etc_"+rec_id+"_data.acts_trim_scaled.npy")
+    # session_id = "Guillermo1"
+    # rec_id = "626"
+    human_data = np.load("/home/guillefix/code/inria/UR5/"+args.session_id+"/obs_act_etc/"+args.rec_id+"/data.npz", allow_pickle=True)
+    traj_data_obss = np.load(processed_data_folder+"UR5_"+args.session_id+"_obs_act_etc_"+args.rec_id+"_data.obs_cont_single_nocol_noarm_incsize_trim_scaled.npy")
+    traj_data_actss = np.load(processed_data_folder+"UR5_"+args.session_id+"_obs_act_etc_"+args.rec_id+"_data.acts_trim_scaled.npy")
     # from sentence_transformers import SentenceTransformer
     import json
     # vocab = json.loads(open("/home/guillefix/code/inria/UR5_processed/acts.npy.annotation.class_index.json","r").read())
-    vocab = json.loads(open("/home/guillefix/code/inria/UR5_processed/npz.annotation.txt.annotation.class_index_reverse.json","r").read())
+    vocab = json.loads(open(processed_data_folder+"npz.annotation.txt.annotation.class_index_reverse.json","r").read())
     # vocab['66'] = ''
     # root_folder = "/home/guillefix/code/inria/UR5_processed/"
     # filename="UR5_Guillermo_obs_act_etc_8_data"
@@ -149,7 +153,8 @@ def run(policy):
     # env._env._env._gym_env.env.env.action_space.low.shape
     # env._env._env._gym_env.env.annotation_emb = annotation_emb
     # env._env._env._gym_env.env.ex_data = human_data
-    env._env._env._gym_env.env.render()
+    if args.render:
+        env._env._env._gym_env.env.render()
     time_step = env.reset()
     # import pdb; pdb.set_trace()
     time_step.observation['obs'] = traj_data_obss[0:n].astype(np.float32)
@@ -159,7 +164,10 @@ def run(policy):
     print(time_step.observation['act'])
     # import pdb; pdb.set_trace()
     #env._env._env._gym_env.env.reset(description="Paint green dog red")
-    env._env._env._gym_env.env.reset(description=human_data["goal_str"][0], o=human_data["obs"][0], info_reset=None, joint_poses=human_data["joint_poses"][0], objects=human_data['obj_stuff'][0], restore_objs=True)
+    goal_str = args.goal_str
+    if args.goal_str is None:
+        goal_str = human_data["goal_str"][0]
+    env._env._env._gym_env.env.reset(description=goal_str, o=human_data["obs"][0], info_reset=None, joint_poses=human_data["joint_poses"][0], objects=human_data['obj_stuff'][0], restore_objs=args.restore_objects)
     time_step = tf_agents.trajectories.time_step.TimeStep(step_type=tf.expand_dims(time_step.step_type,0), reward=tf.expand_dims(time_step.reward,0),
                                               discount=tf.expand_dims(time_step.discount,0),
                                               observation={'obs':tf.expand_dims(time_step.observation['obs'],0), 'annotation_emb':tf.expand_dims(time_step.observation['annotation_emb'],0), 'act':tf.expand_dims(time_step.observation['act'],0)})
@@ -182,8 +190,9 @@ def run(policy):
     # awo=[action1, action2]
     # import pdb; pdb.set_trace()
 
-    for i in range(1000):
-        print(i)
+    achieved_goal_end = False
+    for t in range(args.max_episode_length):
+        print(t)
         # action = 0.1*tf.random.normal([2])
         # obs_t = obs_from_time_step(time_step)
         # acts = torch.from_numpy(action.numpy()).unsqueeze(0).unsqueeze(0).float().cuda()
@@ -196,7 +205,8 @@ def run(policy):
         # action_step = policy.action(time_step, policy_state)
         policy_step = policy.distribution(time_step, policy_state)
         # action = policy_step.action.sample(1)[0]
-        action = policy_step.action.mode()[0]
+        # action = policy_step.action.mode()[0]
+        action = policy_step.action.sample()[0]
         action = tf.expand_dims(action,0)
         # print(action)
         # params = policy_step.action.logits_parameter()
@@ -229,7 +239,7 @@ def run(policy):
         # # time_step.observation['act'] = traj_data_actss[i%(100-n):i%(100-n)+n].astype(np.float32)
         # if (i//20) % 2 == 0: k=0
         # else: k=100
-        k=i
+        # k=t
         # time_step.observation['obs'] = traj_data_obss[k:k+n].astype(np.float32)
         # time_step.observation['act'] = traj_data_actss[k:k+n].astype(np.float32)
         # # time_step.observation['obs'] = traj_data_obss[0:0+n].astype(np.float32)
@@ -246,26 +256,58 @@ def run(policy):
                                                   observation={'obs':tf.expand_dims(time_step.observation['obs'],0), 'annotation_emb':tf.expand_dims(time_step.observation['annotation_emb'],0), 'act':tf.expand_dims(time_step.observation['act'],0)})
         print(time_step.observation['obs'])
         print(time_step.observation['act'])
+        done = env._env._env._gym_env.env.done
+        reward = env._env._env._gym_env.env.reward
+        success = reward > 0
+        print(goal_str+": ",success)
+        achieved_goal_end = success
+        if done:
+            break
         # print(time_step)
+    if args.save_eval_results:
+        varying_args = args.varying_args.split(",")
+        print(Path(args.savepath+"/results"))
+        if not Path(args.savepath+"/results").is_dir():
+            os.mkdir(args.savepath+"/results")
+        filename = args.savepath+"/results/"+"eval_"
+        args_dict = vars(args)
+        for k in varying_args:
+            filename += str(args_dict[k])+"_"
+        filename += "_".join(goal_str.split(" "))+".txt"
+        if os.path.exists(filename):
+            with open(filename, "a") as f:
+                f.write(str(achieved_goal_end)+","+str(t)+"\n")
+        else:
+            with open(filename, "w") as f:
+                f.write("achieved_goal_end,num_steps"+"\n")
+                f.write(str(achieved_goal_end)+","+str(t)+"\n")
 
-    video_env.close()
+    # video_env.close()
 
-    metrics[1]._env.succeeded
-    metrics[0][0].result()
-    metrics[1].result()
-    metrics[1]._np_state.success
-    metrics[1]._buffer
+    # metrics[1]._env.succeeded
+    # metrics[0][0].result()
+    # metrics[1].result()
+    # metrics[1]._np_state.success
+    # metrics[1]._buffer
 
 
 
-    agent.policy
+    # agent.policy
     #%%
     ######################
 
 
-# policy = tf.compat.v2.saved_model.load('/home/guillefix/code/ibc_logs/mlp_ebm/ibc_dfo/20220704-221712/policies/policy/')
-policy = tf.compat.v2.saved_model.load('/home/guillefix/code/awo_testing3')
-# from tf_agents.policies import greedy_policy
-# policy = greedy_policy.GreedyPolicy(policy)
+if __name__ == "__main__":
+    # policy = tf.compat.v2.saved_model.load('/home/guillefix/code/ibc_logs/mlp_ebm/ibc_dfo/20220704-221712/policies/policy/')
+    # policy = tf.compat.v2.saved_model.load('/home/guillefix/code/awo_testing3')
+    policy = tf.compat.v2.saved_model.load('/home/guillefix/code/awo_testing3_old')
+    # from tf_agents.policies import greedy_policy
+    # policy = greedy_policy.GreedyPolicy(policy)
 
-run(policy)
+    args_dir = {"session_id": "Guillermo1", "rec_id": "626"}
+
+    class Struct:
+        def __init__(self, **entries):
+            self.__dict__.update(entries)
+    args = Struct(**args_dir)
+    run(policy, args)
