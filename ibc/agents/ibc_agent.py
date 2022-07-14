@@ -298,6 +298,7 @@ class ImplicitBCAgent(base_agent.BehavioralCloningAgent):
 
         # This is a bit of a hack, but it makes it so can compute eval loss,
         # including with various metrics.
+        tf.print(total_loss)
         if training:
           return tf_agent.LossInfo(total_loss, ()), tape
         else:

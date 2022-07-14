@@ -1,6 +1,7 @@
 import sys
 from os.path import dirname
-#root_dir = "/home/guillefix/code/inria/RobotLangEnv/"
+root_dir = "/home/guillefix/code/inria/RobotLangEnv/"
+sys.path.append(root_dir)
 root_dir = "/gpfswork/rech/imi/usc19dv/captionRLenv/"
 sys.path.append(root_dir)
 
@@ -56,6 +57,8 @@ class LangRobotEnv(ExtendedUR5PlayAbsRPY1Obj):
             'act': spaces.Box(low=-10, high=10, shape=(8,), dtype=np.float32)
         })
         self.annotation_emb = None
+        self.done = False
+        self.reward = 0
 
     def step(self, action):
         obs, r, done, info = super().step(np.array(action))
@@ -67,6 +70,8 @@ class LangRobotEnv(ExtendedUR5PlayAbsRPY1Obj):
             act=obs[2][0]
         )
         # print(observation)
+        self.done = done
+        self.reward = r
 
         return observation, r, done, info
 
@@ -84,6 +89,8 @@ class LangRobotEnv(ExtendedUR5PlayAbsRPY1Obj):
             act=self.observation_space["act"].sample()
         )
         print(observation["annotation_emb"].shape)
+        self.done = False
+        self.reward = 0
         return observation
 
     def get_metrics(self, num_episodes):
