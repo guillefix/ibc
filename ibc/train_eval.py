@@ -26,6 +26,8 @@ from absl import app
 from absl import flags
 from absl import logging
 import gin
+import tensorflow as tf
+#print(tf.__version__)
 from ibc.environments.block_pushing import block_pushing  # pylint: disable=unused-import
 from ibc.environments.block_pushing import block_pushing_discontinuous  # pylint: disable=unused-import
 from ibc.environments.particle import particle  # pylint: disable=unused-import
@@ -40,7 +42,6 @@ from ibc.ibc.train import get_learner as learner_module
 from ibc.ibc.train import get_normalizers as normalizers_module
 from ibc.ibc.train import get_sampling_spec as sampling_spec_module
 from ibc.ibc.utils import make_video as video_module
-import tensorflow as tf
 gpus = tf.config.experimental.list_physical_devices('GPU')
 for gpu in gpus:
   tf.config.experimental.set_memory_growth(gpu, True)
@@ -71,8 +72,12 @@ flags.DEFINE_bool('skip_eval', False,
                   'policy_eval binary.')
 flags.DEFINE_bool('multi_gpu', False,
                   'If true, run in multi-gpu setting.')
+
 flags.DEFINE_bool('continue_train', False,
                   'If true, restore from checkpoint')
+
+flags.DEFINE_string('saving_folder', 'awo_testing3',
+                    'folder on which to save policy')
 
 flags.DEFINE_enum('device_type', 'gpu', ['gpu', 'tpu'],
                   'Where to perform training.')
@@ -116,7 +121,7 @@ def train_eval(
     image_obs=False,
     strategy=None,
     continue_train=False,
-    continue_train=False,
+    saving_folder=None,
     # Use this to sweep amount of tfrecords going into training.
     # -1 for 'use all'.
     max_data_shards=-1,
@@ -244,14 +249,10 @@ def train_eval(
 
     #########
 
-    if continue_train:
-        policy_restore = tf.compat.v2.saved_model.load('awo_testing3')
-        policy = agent.policy
-        restored_vars = {v.name:v.numpy() for v in policy_restore.model_variables}
-        for v in policy.trainable_variables: v = restored_vars[v.name]
     # import pdb; pdb.set_trace()
     # policy = agent.collect_policy
 
+    policy = agent.policy
     from tf_agents.policies import PolicySaver
     saver = PolicySaver(policy, batch_size=None)
     # saver.save("awo_testing")
@@ -304,11 +305,16 @@ def train_eval(
       os.path.join(root_dir, 'operative-gin-config.txt'), 'wb') as f:
     f.write(gin.operative_config_str())
 
+  if continue_train:
+      print("CONTINUE TRAIN")
+      policy_restore = tf.compat.v2.saved_model.load(saving_folder)
+      restored_vars = {v.name:v.numpy() for v in policy_restore.model_variables}
+      for v in policy.trainable_variables: v = restored_vars[v.name]
   # Main train and eval loop.
   while train_step.numpy() < num_iterations:
     # Run bc_learner for fused_train_steps.
     training_step(agent, bc_learner, fused_train_steps, train_step)
-    saver.save("awo_testing3")
+    saver.save(saving_folder)
 
     if (dist_eval_data_iter is not None and
         train_step.numpy() % eval_loss_interval == 0):
@@ -437,6 +443,9 @@ def main(_):
   # If setting this to True, change `my_rangea in mcmc.py to `= range`
   tf.config.experimental_run_functions_eagerly(False)
 
+  print("SAVING FOLDER")
+  print(FLAGS.saving_folder)
+
   train_eval(
       task=task,
       tag=FLAGS.tag,
@@ -448,6 +457,7 @@ def main(_):
       strategy=strategy,
       eval_interval=100,
       continue_train=FLAGS.continue_train,
+      saving_folder=FLAGS.saving_folder,
       checkpoint_interval=100)
       # dataset_path=gin.dataset_path)
       # checkpoint_interval=1)
