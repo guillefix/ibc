@@ -82,6 +82,12 @@ flags.DEFINE_string('saving_folder', 'awo_testing3',
 flags.DEFINE_enum('device_type', 'gpu', ['gpu', 'tpu'],
                   'Where to perform training.')
 
+flags.DEFINE_int('decay_steps', 100,
+                  'Number of steps by which to decay the learning rate by the decay rate')
+
+flags.DEFINE_float('decay_rate', 0.99,
+                 'Decay rate for the keras exponential decay')
+
 FLAGS = flags.FLAGS
 VIZIER_KEY = 'success'
 
@@ -100,6 +106,7 @@ def train_eval(
     num_iterations=20000,
     learning_rate=1e-3,
     decay_steps=100,
+    decay_rate=0.99,
     replay_capacity=100000,
     eval_interval=1000,
     eval_loss_interval=100,
@@ -453,6 +460,8 @@ def main(_):
       viz_img=FLAGS.viz_img,
       skip_eval=FLAGS.skip_eval,
       learning_rate=1e-4,
+      decay_steps=FLAGS.decay_steps,
+      decay_rate=FLAGS.decay_rate,
       shared_memory_eval=FLAGS.shared_memory_eval,
       strategy=strategy,
       eval_interval=100,
