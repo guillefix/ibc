@@ -77,7 +77,8 @@ def run(policy, args):
     task = "LANG_ROBOT"
     shared_memory_eval=False
     use_image_obs=False
-    sequence_length=3
+    # sequence_length=3
+    sequence_length=1
     goal_tolerance=0.02
     num_envs=1
 
@@ -301,7 +302,8 @@ def run(policy, args):
 if __name__ == "__main__":
     # policy = tf.compat.v2.saved_model.load('/home/guillefix/code/ibc_logs/mlp_ebm/ibc_dfo/20220704-221712/policies/policy/')
     # policy = tf.compat.v2.saved_model.load('/home/guillefix/code/awo_testing3')
-    policy = tf.compat.v2.saved_model.load('/home/guillefix/code/awo_longer_seq_len')
+    #policy = tf.compat.v2.saved_model.load('/home/guillefix/code/awo_longer_seq_len')
+    policy = tf.compat.v2.saved_model.load('/home/guillefix/code/awo_testin_smallerlr')
     # policy = tf.compat.v2.saved_model.load('/home/guillefix/code/awo_testing3_old')
     # policy = tf.compat.v2.saved_model.load('/home/guillefix/code/awo_testing4')
     # from tf_agents.policies import greedy_policy

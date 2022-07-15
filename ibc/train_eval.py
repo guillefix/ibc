@@ -77,6 +77,9 @@ flags.DEFINE_bool('continue_train', False,
 flags.DEFINE_enum('device_type', 'gpu', ['gpu', 'tpu'],
                   'Where to perform training.')
 
+flags.DEFINE_int('decay_steps', 100,
+                  'Number of steps by which to decay the learning rate by the decay rate')
+
 FLAGS = flags.FLAGS
 VIZIER_KEY = 'success'
 
@@ -444,6 +447,7 @@ def main(_):
       viz_img=FLAGS.viz_img,
       skip_eval=FLAGS.skip_eval,
       learning_rate=1e-4,
+      decay_steps=FLAGS.decay_steps,
       shared_memory_eval=FLAGS.shared_memory_eval,
       strategy=strategy,
       eval_interval=100,
