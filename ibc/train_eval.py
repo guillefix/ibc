@@ -82,7 +82,7 @@ flags.DEFINE_string('saving_folder', 'awo_testing3',
 flags.DEFINE_enum('device_type', 'gpu', ['gpu', 'tpu'],
                   'Where to perform training.')
 
-flags.DEFINE_int('decay_steps', 100,
+flags.DEFINE_integer('decay_steps', 100,
                   'Number of steps by which to decay the learning rate by the decay rate')
 
 flags.DEFINE_float('decay_rate', 0.99,
