@@ -57,6 +57,7 @@ def get_agent(loss_type,
               use_warmup,
               cloning_network,
               train_step,
+              decay_rate,
               decay_steps):
   """Creates tfagent."""
   if use_warmup:
@@ -64,7 +65,7 @@ def get_agent(loss_type,
   else:
     learning_rate_schedule = (
         tf.keras.optimizers.schedules.ExponentialDecay(
-            learning_rate, decay_steps=decay_steps, decay_rate=0.99))
+            learning_rate, decay_steps=decay_steps, decay_rate=decay_rate))
   optimizer = tf.keras.optimizers.Adam(learning_rate=learning_rate_schedule)
 
   if loss_type == LossType.EBM.value:
