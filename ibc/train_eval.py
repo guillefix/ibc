@@ -241,6 +241,7 @@ def train_eval(
                                    use_warmup,
                                    cloning_network,
                                    train_step,
+                                   decay_rate,
                                    decay_steps)
     # cloning_network_restore = policy_restore.cloning_network
     # import pdb; pdb.set_trace()
