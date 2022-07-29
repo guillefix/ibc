@@ -88,6 +88,10 @@ flags.DEFINE_integer('decay_steps', 100,
 flags.DEFINE_float('decay_rate', 0.99,
                  'Decay rate for the keras exponential decay')
 
+flags.DEFINE_bool('use_warmup', False,
+                  'if true, we use warmup for learning rate schedule')
+
+
 FLAGS = flags.FLAGS
 VIZIER_KEY = 'success'
 
@@ -466,6 +470,7 @@ def main(_):
       shared_memory_eval=FLAGS.shared_memory_eval,
       strategy=strategy,
       eval_interval=100,
+      use_warmup=FLAGS.use_warmup,
       continue_train=FLAGS.continue_train,
       saving_folder=FLAGS.saving_folder,
       checkpoint_interval=100)
