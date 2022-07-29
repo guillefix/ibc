@@ -436,6 +436,8 @@ def get_probabilities(energy_network,
   """Get probabilities to post-process Langevin results."""
   net_logits, _ = energy_network(
       (observations, actions), training=training)
+
+  # import pdb; pdb.set_trace()
   net_logits = tf.reshape(net_logits, (batch_size, num_action_samples))
   probs = tf.nn.softmax(net_logits / temperature, axis=1)
   probs = tf.reshape(probs, (-1,))

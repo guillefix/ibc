@@ -20,7 +20,7 @@ os.environ['OPENBLAS_NUM_THREADS'] = '1'
 import collections
 import datetime
 import functools
-import os
+import sys
 
 from absl import app
 from absl import flags
@@ -49,6 +49,7 @@ from tf_agents.train.utils import spec_utils
 from tf_agents.train.utils import strategy_utils
 from tf_agents.train.utils import train_utils
 from tf_agents.utils import common
+import tf_agents
 
 flags.DEFINE_string('tag', None,
                     'Tag for the experiment. Appended to the root_dir.')
@@ -105,6 +106,7 @@ def train_eval(
     replay_capacity=100000,
     eval_interval=1000,
     eval_loss_interval=100,
+    # eval_loss_interval=1,
     eval_episodes=1,
     fused_train_steps=100,
     sequence_length=2,
@@ -122,7 +124,6 @@ def train_eval(
     shared_memory_eval=False,
     image_obs=False,
     strategy=None,
-    continue_train=False,
     continue_train=False,
     # Use this to sweep amount of tfrecords going into training.
     # -1 for 'use all'.
@@ -158,8 +159,17 @@ def train_eval(
     eval_envs.append(eval_env)
     env_names.append(env_name)
 
+  print(eval_envs[0].observation_spec())
   obs_tensor_spec, action_tensor_spec, time_step_tensor_spec = (
       spec_utils.get_tensor_specs(eval_envs[0]))
+
+  obs_tensor_spec = collections.OrderedDict([('act', tf_agents.specs.BoundedTensorSpec(shape=(1, 8), dtype=tf.float32, name='observation/act', minimum=-10., maximum=10.)), \
+  ('annotation', tf_agents.specs.BoundedTensorSpec(shape=(1, 10), dtype=tf.int64, name='observation/annotation', minimum=0, maximum=71)), \
+  ('obs', tf_agents.specs.BoundedTensorSpec(shape=(1, 21), dtype=tf.float32, name='observation/obs', minimum=-10., maximum=10.))])
+  print(obs_tensor_spec)
+  print("OOOOOOOWOWOWOWOWO")
+  time_step_tensor_spec.observation['annotation'] = obs_tensor_spec['annotation']
+  print(time_step_tensor_spec.observation)
 
   # print(dataset_path)
   # import pdb; pdb.set_trace()
@@ -260,8 +270,10 @@ def train_eval(
     # import pdb; pdb.set_trace()
     # policy = agent.collect_policy
 
+    policy = agent.policy
     from tf_agents.policies import PolicySaver
-    saver = PolicySaver(policy, batch_size=None)
+    # saver = PolicySaver(policy, batch_size=None)
+    saver = PolicySaver(policy, batch_size=1)
     # saver.save("awo_testing")
 
     # from ibc.evaluate_model import run
@@ -313,17 +325,20 @@ def train_eval(
     f.write(gin.operative_config_str())
 
   # Main train and eval loop.
+  print("AAAAAAAAAAAWWWWWOOOOOOOOOOOOO")
   while train_step.numpy() < num_iterations:
     # Run bc_learner for fused_train_steps.
     training_step(agent, bc_learner, fused_train_steps, train_step)
     saver.save("awo_testing3")
 
+    print("AAAAAAAAAAAAAAAAA")
     if (dist_eval_data_iter is not None and
         train_step.numpy() % eval_loss_interval == 0):
       # Run a validation step.
       validation_step(
           dist_eval_data_iter, bc_learner, train_step, get_eval_loss)
 
+    print("BBBBBBBBBBBBBBBBBb")
     if not skip_eval and train_step.numpy() % eval_interval == 0:
 
       all_metrics = []
@@ -337,6 +352,7 @@ def train_eval(
             name_scope_suffix=f'_{env_name}')
         all_metrics.append(metrics)
 
+        print("CCCCCCCCCCCCCCCC")
         # rendering on some of these envs is broken
         if FLAGS.video and 'kitchen' not in task:
           if 'PARTICLE' in task:
@@ -350,6 +366,7 @@ def train_eval(
               step=train_step.numpy(),
               strategy=strategy)
 
+      print("DDDDDDDDDDDDDD")
       metric_results = collections.defaultdict(list)
       for env_metrics in all_metrics:
         for metric in env_metrics:
@@ -363,6 +380,8 @@ def train_eval(
               name=os.path.join('AggregatedMetrics/', key),
               data=sum(value) / len(value),
               step=train_step)
+
+    sys.stdout.flush(   )
 
   summary_writer.flush()
 
@@ -391,6 +410,7 @@ def training_step(agent, bc_learner, fused_train_steps, train_step):
 def validation_step(dist_eval_data_iter, bc_learner, train_step,
                     get_eval_loss_fn):
   """Runs a validation step."""
+  print("VAlIDATION STEP")
   losses_dict = get_eval_loss_fn(next(dist_eval_data_iter))
 
   with bc_learner.train_summary_writer.as_default(), tf.summary.record_if(
@@ -402,6 +422,7 @@ def validation_step(dist_eval_data_iter, bc_learner, train_step,
 def evaluation_step(eval_episodes, eval_env, eval_actor, name_scope_suffix=''):
   """Evaluates the agent in the environment."""
   logging.info('Evaluating policy.')
+  print("Evaluating policy")
   with tf.name_scope('eval' + name_scope_suffix):
     # This will eval on seeds:
     # [0, 1, ..., eval_episodes-1]
@@ -456,7 +477,8 @@ def main(_):
       decay_rate=FLAGS.decay_rate,
       shared_memory_eval=FLAGS.shared_memory_eval,
       strategy=strategy,
-      eval_interval=100,
+      eval_interval=1,
+      eval_loss_interval=1,
       continue_train=FLAGS.continue_train,
       checkpoint_interval=100)
       # dataset_path=gin.dataset_path)

@@ -18,6 +18,7 @@ import copy
 
 import ibc.ibc.utils.constants as constants
 from ibc.networks import mlp_ebm
+from ibc.networks import mlp_ebm_lang
 from ibc.networks import mlp_mdn
 from ibc.networks import mlp_mse
 from ibc.networks import pixel_ebm
@@ -72,7 +73,11 @@ def get_cloning_network(
 
   obs_tensor_spec = adjust_img_spec_to_float(obs_tensor_spec)
 
-  if name == 'MLPEBM':
+  if name == 'MLPEBMLang':
+    cloning_network = mlp_ebm_lang.MLPEBMLang(
+        obs_spec=(obs_tensor_spec, action_tensor_spec),
+        action_spec=tf.TensorSpec([1]))
+  elif name == 'MLPEBM':
     cloning_network = mlp_ebm.MLPEBM(
         obs_spec=(obs_tensor_spec, action_tensor_spec),
         action_spec=tf.TensorSpec([1]))

@@ -14,8 +14,8 @@
 # limitations under the License.
 
 #train_eval.root_dir = '/tmp/ibc_logs/mlp_ebm_langevin'
-#train_eval.root_dir = '/home/guillefix/code/ibc_logs/mlp_ebm'
-train_eval.root_dir = '/gpfsscratch/rech/imi/usc19dv/data/ibc_logs/mlp_ebm'
+train_eval.root_dir = '/home/guillefix/code/ibc_logs/mlp_ebm'
+#train_eval.root_dir = '/gpfsscratch/rech/imi/usc19dv/data/ibc_logs/mlp_ebm'
 train_eval.loss_type = 'ebm' # specifies we are training ebm.
 train_eval.network = 'MLPEBM'
 train_eval.batch_size = 512
