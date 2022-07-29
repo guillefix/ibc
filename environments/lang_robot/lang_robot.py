@@ -19,13 +19,17 @@ model = SentenceTransformer('all-MiniLM-L6-v2')
 
 def build_env_name(task):
     """Construct the env name from parameters."""
-    return "LangRobot-v0"
+    if task == 'LANG_ROBOT':
+        return "LangRobot-v0"
+    elif task == 'LANG_ROBOT_LANG':
+        return "LangRobotLang-v0"
 
 import gym
 from gym import spaces
 from gym.envs import registration
 import numpy as np
 from constants import *
+import tf_agents
 
 import pickle
 obs_mod = "obs_cont_single_nocol_noarm_incsize_trim_scaled"
@@ -98,9 +102,80 @@ class LangRobotEnv(ExtendedUR5PlayAbsRPY1Obj):
         success_metric = None
         return metrics, success_metric
 
+class LangRobotEnvLang(ExtendedUR5PlayAbsRPY1Obj):
+    """Custom Environment that follows gym interface"""
+    metadata = {'render.modes': ['human']}
+
+    def __init__(self):
+        super(LangRobotEnvLang, self).__init__(obs_scaler=obs_scaler, acts_scaler=acts_scaler, desc_max_len=10, obs_mod="obs_cont_single_nocol_noarm_incsize_trim_scaled")
+
+        # self.action_space = spaces.Box(low=-10, high=10, shape=(8,), dtype=np.float32)
+
+        self.observation_space = spaces.Dict({
+            'obs': spaces.Box(low=-10, high=10, shape=(21,), dtype=np.float32),
+            'annotation': spaces.MultiDiscrete([72]*10, dtype=np.int64),
+            'act': spaces.Box(low=-10, high=10, shape=(8,), dtype=np.float32)
+        })
+        self.annotation = None
+        self.done = False
+        self.reward = 0
+
+    def step(self, action):
+        obs, r, done, info = super().step(np.array(action))
+
+        # print(obs[2].shape)
+        observation = collections.OrderedDict(
+            obs=obs[1][0],
+            annotation=self.annotation,
+            act=obs[2][0]
+        )
+        # print(observation)
+        self.done = done
+        self.reward = r
+
+        return observation, r, done, info
+
+    def reset(self, **kwargs):
+        obs = super().reset(**kwargs)
+        print("OOOOOOOOOOOOOOOO")
+        # print(self.goal_str)
+        tokens = [int(x) for x in self.tokens]
+        # ann_emb = model.encode(sent)
+        self.annotation = np.array(tokens).astype(np.int64)
+        # import pdb; pdb.set_trace()
+        observation = collections.OrderedDict(
+            obs=self.observation_space["obs"].sample(),
+            annotation=self.annotation,
+            act=self.observation_space["act"].sample()
+        )
+        # import pdb; pdb.set_trace()
+        # print(observation["annotation"].shape)
+        self.done = False
+        self.reward = 0
+        return observation
+
+    def get_metrics(self, num_episodes):
+        metrics = []
+        success_metric = None
+        return metrics, success_metric
+
+    @property
+    def observation_spec(self):
+      obs_tensor_spec = collections.OrderedDict([('act', tf_agents.specs.BoundedTensorSpec(shape=(1, 8), dtype=tf.float32, name='observation/act', minimum=-10., maximum=10.)), \
+      ('annotation', tf_agents.specs.BoundedTensorSpec(shape=(1, 10), dtype=tf.int64, name='observation/annotation', minimum=0, maximum=71)), \
+      ('obs', tf_agents.specs.BoundedTensorSpec(shape=(1, 21), dtype=tf.float32, name='observation/obs', minimum=-10., maximum=10.))])
+      return obs_tensor_spec
+
 if 'LangRobot-v0' in registration.registry.env_specs:
     del registration.registry.env_specs['LangRobot-v0']
 registration.register(
     id='LangRobot-v0',
     entry_point=LangRobotEnv,
+    max_episode_steps=1000)
+
+if 'LangRobotLang-v0' in registration.registry.env_specs:
+    del registration.registry.env_specs['LangRobotLang-v0']
+registration.register(
+    id='LangRobotLang-v0',
+    entry_point=LangRobotEnvLang,
     max_episode_steps=1000)

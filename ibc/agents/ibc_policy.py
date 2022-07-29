@@ -241,6 +241,7 @@ class IbcPolicy(tf_policy.TFPolicy):
     # Use first observation to figure out batch/time sizes as they should be the
     # same across all observations.
     observations = time_step.observation
+    # import pdb; pdb.set_trace()
     if isinstance(observations, dict) and 'rgb' in observations:
       observations['rgb'] = tf.image.convert_image_dtype(
           observations['rgb'], dtype=tf.float32)
@@ -249,8 +250,11 @@ class IbcPolicy(tf_policy.TFPolicy):
       observations = self._obs_norm_layer(observations)
       if isinstance(self._obs_norm_layer, nest_map.NestMap):
         observations, _ = observations
+    # tf.print(observations)
+    # print(observations)
 
     single_obs = tf.nest.flatten(observations)[0]
+    # import pdb; pdb.set_trace()
     batch_size = tf.shape(single_obs)[0]
 
     if self._late_fusion:
@@ -258,6 +262,7 @@ class IbcPolicy(tf_policy.TFPolicy):
     else:
       maybe_tiled_obs = nest_utils.tile_batch(observations,
                                               self._num_action_samples)
+    # import pdb; pdb.set_trace()
     # Initialize.
     # TODO(peteflorence): support other initialization options.
     action_samples = tensor_spec.sample_spec_nest(
@@ -265,6 +270,8 @@ class IbcPolicy(tf_policy.TFPolicy):
         outer_dims=(batch_size * self._num_action_samples,))
 
     # MCMC.
+    # tf.print(maybe_tiled_obs)
+    # print(maybe_tiled_obs)
     probs = 0
     if self._use_dfo:
       probs, action_samples, _ = mcmc.iterative_dfo(

@@ -83,6 +83,8 @@ def get_normalizers(train_data,
            nested_actions=nested_actions,
            min_max_actions=min_max_actions))
 
+  obs_norm_layer = act_norm_layer = None
+
   # Define a function used to normalize training data inside a tf.data .map().
   def norm_train_data_fn(obs_and_act, nothing):
     obs = obs_and_act[0]

@@ -303,7 +303,12 @@ if __name__ == "__main__":
     # policy = tf.compat.v2.saved_model.load('/home/guillefix/code/ibc_logs/mlp_ebm/ibc_dfo/20220704-221712/policies/policy/')
     # policy = tf.compat.v2.saved_model.load('/home/guillefix/code/awo_testing3')
     #policy = tf.compat.v2.saved_model.load('/home/guillefix/code/awo_longer_seq_len')
-    policy = tf.compat.v2.saved_model.load('/home/guillefix/code/awo_testin_smallerlr')
+    # policy = tf.compat.v2.saved_model.load('/home/guillefix/code/awo_testin_smallerlr')
+    # policy = tf.compat.v2.saved_model.load('/home/guillefix/code/awo_testin_bigbs_lr2_decayfast2')
+    # policy = tf.compat.v2.saved_model.load('/home/guillefix/code/awo_testin_bigbs_lr2_decayfas87')
+    # policy = tf.compat.v2.saved_model.load('/home/guillefix/code/awo_testin_bigbs_lr2_decayfast7')
+    policy = tf.compat.v2.saved_model.load('/home/guillefix/code/awo_testin_bigbs_lr2_decayfas12')
+    # policy = tf.compat.v2.saved_model.load('/home/guillefix/code/awo_testin_bigbs_lr2_decayfast16')
     # policy = tf.compat.v2.saved_model.load('/home/guillefix/code/awo_testing3_old')
     # policy = tf.compat.v2.saved_model.load('/home/guillefix/code/awo_testing4')
     # from tf_agents.policies import greedy_policy
@@ -311,6 +316,8 @@ if __name__ == "__main__":
 
     args_dir = {"session_id": "Guillermo1", "rec_id": "626", "render": True, "goal_str": None,
                 "save_eval_results": False, "max_episode_length": 3000, "restore_objects": True}
+    # args_dir = {"session_id": "Guillermo1", "rec_id": "629", "render": True, "goal_str": None,
+    #             "save_eval_results": False, "max_episode_length": 3000, "restore_objects": True}
 
     class Struct:
         def __init__(self, **entries):

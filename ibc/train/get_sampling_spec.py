@@ -63,8 +63,12 @@ def get_sampling_spec(action_tensor_spec,
                                                         lambda a: a[1],
                                                         action_limit_nest)
 
-  normalized_min_actions = act_norm_layer(buffered_min_actions)[0]
-  normalized_max_actions = act_norm_layer(buffered_max_actions)[0]
+  if act_norm_layer is not None:
+      normalized_min_actions = act_norm_layer(buffered_min_actions)[0]
+      normalized_max_actions = act_norm_layer(buffered_max_actions)[0]
+  else:
+      normalized_min_actions = buffered_min_actions
+      normalized_max_actions = buffered_max_actions
 
   def bounded_like(spec, min_action, max_action):
     return tensor_spec.BoundedTensorSpec(

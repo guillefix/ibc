@@ -22,7 +22,7 @@ from ibc.environments.block_pushing import block_pushing
 from ibc.environments.block_pushing import block_pushing_discontinuous
 from ibc.environments.block_pushing import block_pushing_multimodal
 from ibc.environments.lang_robot import lang_robot
-from ibc.environments.lang_robot.lang_robot import LangRobotEnv
+from ibc.environments.lang_robot.lang_robot import LangRobotEnv, LangRobotEnvLang
 from ibc.ibc import tasks
 try:
   from ibc.ibc.eval import d4rl_utils  # pylint: disable=g-import-not-at-top
@@ -41,7 +41,7 @@ FLAGS = flags.FLAGS
 
 def get_env_name(task, shared_memory_eval, use_image_obs=False):
   """Returns environment name for a given task."""
-  if task in ['LANG_ROBOT']:
+  if task in ['LANG_ROBOT', 'LANG_ROBOT_LANG']:
     env_name = lang_robot.build_env_name(task)
   elif task in ['REACH', 'PUSH', 'INSERT', 'REACH_NORMALIZED', 'PUSH_NORMALIZED']:
     env_name = block_pushing.build_env_name(
