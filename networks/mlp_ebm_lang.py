@@ -25,6 +25,10 @@ from transformers import BertTokenizer, TFBertModel
 import copy
 from collections import OrderedDict
 
+from transformers import AutoConfig, TFAutoModel
+#config = AutoConfig.from_pretrained('bert-base-uncased', vocab_size=73)
+config = AutoConfig.from_pretrained('bert-base-uncased', vocab_size=73, num_hidden_layers=6, num_attention_heads=8, hidden_size=512)
+
 
 # inputs = tokenizer("Hello, my dog is cute", return_tensors="tf")
 #
@@ -79,7 +83,8 @@ class MLPEBMLang(network.Network):
           dense, activation)
 
     # tokenizer = BertTokenizer.from_pretrained("bert-base-uncased")
-    model = TFBertModel.from_pretrained("bert-base-uncased")
+    #model = TFBertModel.from_pretrained("bert-base-uncased")
+    model =  TFAutoModel.from_config(config)
     # self._tokenizer = tokenizer
     self._encoder = model
     #TODO: randomly reinitialize?
