@@ -8,10 +8,10 @@ python3 ibc/ibc/train_eval.py -- \
   --add_time=True \
   --skip_eval=True \
   --saving_folder=awo_testin_lang \
-  --decay_steps=4 \
+  --decay_steps=10 \
   --decay_rate=0.8 \
   --gin_bindings="train_eval.dataset_path='ibc/data/UR5_single_lang/tw_data*.tfrecord'" \
-  --gin_bindings="train_eval.batch_size=64" \
+  --gin_bindings="train_eval.batch_size=512" \
   --gin_bindings="train_eval.learning_rate=1e-5" \
   --gin_bindings="train_eval.network='MLPEBMLang'" \
   $@
