@@ -74,7 +74,8 @@ def run(policy, args):
     # )
 
 
-    task = "LANG_ROBOT"
+    # task = "LANG_ROBOT"
+    task = "LANG_ROBOT_LANG"
     shared_memory_eval=False
     use_image_obs=False
     # sequence_length=3
@@ -140,7 +141,8 @@ def run(policy, args):
     # action = 0.1*tf.random.normal([2])
     # action.numpy()
     # while not time_step.is_last():
-    policy_state = policy.get_initial_state(1)
+    #policy_state = policy.get_initial_state(1)
+    policy_state = policy.get_initial_state()
 
     # policy._policy._wrapped_policy._obs_norm_layer(time_step.observation)
 
@@ -161,7 +163,7 @@ def run(policy, args):
     time_step.observation['obs'] = traj_data_obss[0:n].astype(np.float32)
     time_step.observation['act'] = traj_data_actss[0:n].astype(np.float32)
     # time_step.observation['annotation_emb'] = time_step.observation['annotation_emb'][:1]
-    time_step.observation['annotation_emb'] = time_step.observation['annotation_emb'][:n]
+    # time_step.observation['annotation_emb'] = time_step.observation['annotation_emb'][:n]
     print(time_step.observation['obs'])
     print(time_step.observation['act'])
     # import pdb; pdb.set_trace()
@@ -170,9 +172,12 @@ def run(policy, args):
     if args.goal_str is None:
         goal_str = human_data["goal_str"][0]
     env._env._env._gym_env.env.reset(description=goal_str, o=human_data["obs"][0], info_reset=None, joint_poses=human_data["joint_poses"][0], objects=human_data['obj_stuff'][0], restore_objs=args.restore_objects)
+    # time_step = tf_agents.trajectories.time_step.TimeStep(step_type=tf.expand_dims(time_step.step_type,0), reward=tf.expand_dims(time_step.reward,0),
+    #                                           discount=tf.expand_dims(time_step.discount,0),
+    #                                           observation={'obs':tf.expand_dims(time_step.observation['obs'],0), 'annotation_emb':tf.expand_dims(time_step.observation['annotation_emb'],0), 'act':tf.expand_dims(time_step.observation['act'],0)})
     time_step = tf_agents.trajectories.time_step.TimeStep(step_type=tf.expand_dims(time_step.step_type,0), reward=tf.expand_dims(time_step.reward,0),
                                               discount=tf.expand_dims(time_step.discount,0),
-                                              observation={'obs':tf.expand_dims(time_step.observation['obs'],0), 'annotation_emb':tf.expand_dims(time_step.observation['annotation_emb'],0), 'act':tf.expand_dims(time_step.observation['act'],0)})
+                                              observation={'obs':tf.expand_dims(time_step.observation['obs'],0), 'annotation':tf.expand_dims(time_step.observation['annotation'],0), 'act':tf.expand_dims(time_step.observation['act'],0)})
 
     traj_data_actss = traj_data_actss[2:]
     traj_data_obss = traj_data_obss[2:]
@@ -253,9 +258,12 @@ def run(policy, args):
         # time_step = tf_agents.trajectories.time_step.TimeStep(step_type=tf.expand_dims(time_step.step_type,0), reward=tf.expand_dims(time_step.reward,0),
         #                                           discount=tf.expand_dims(time_step.discount,0),
         #                                           observation={'obs':tf.expand_dims(time_step.observation['obs'],0), 'annotation_emb':tf.expand_dims(time_step.observation['annotation_emb'],0), 'act':tf.expand_dims(time_step.observation['act'],0)})
+        # time_step = tf_agents.trajectories.time_step.TimeStep(step_type=tf.expand_dims(time_step.step_type,0), reward=tf.expand_dims(time_step.reward,0),
+        #                                           discount=tf.expand_dims(time_step.discount,0),
+        #                                           observation={'obs':tf.expand_dims(time_step.observation['obs'],0), 'annotation_emb':tf.expand_dims(time_step.observation['annotation_emb'],0), 'act':tf.expand_dims(time_step.observation['act'],0)})
         time_step = tf_agents.trajectories.time_step.TimeStep(step_type=tf.expand_dims(time_step.step_type,0), reward=tf.expand_dims(time_step.reward,0),
                                                   discount=tf.expand_dims(time_step.discount,0),
-                                                  observation={'obs':tf.expand_dims(time_step.observation['obs'],0), 'annotation_emb':tf.expand_dims(time_step.observation['annotation_emb'],0), 'act':tf.expand_dims(time_step.observation['act'],0)})
+                                                  observation={'obs':tf.expand_dims(time_step.observation['obs'],0), 'annotation':tf.expand_dims(time_step.observation['annotation'],0), 'act':tf.expand_dims(time_step.observation['act'],0)})
         print(time_step.observation['obs'])
         print(time_step.observation['act'])
         done = env._env._env._gym_env.env.done
@@ -307,7 +315,8 @@ if __name__ == "__main__":
     # policy = tf.compat.v2.saved_model.load('/home/guillefix/code/awo_testin_bigbs_lr2_decayfast2')
     # policy = tf.compat.v2.saved_model.load('/home/guillefix/code/awo_testin_bigbs_lr2_decayfas87')
     # policy = tf.compat.v2.saved_model.load('/home/guillefix/code/awo_testin_bigbs_lr2_decayfast7')
-    policy = tf.compat.v2.saved_model.load('/home/guillefix/code/awo_testin_bigbs_lr2_decayfas12')
+    # policy = tf.compat.v2.saved_model.load('/home/guillefix/code/awo_testin_bigbs_lr2_decayfas12')
+    policy = tf.compat.v2.saved_model.load('/home/guillefix/code/awo_testin_lang')
     # policy = tf.compat.v2.saved_model.load('/home/guillefix/code/awo_testin_bigbs_lr2_decayfast16')
     # policy = tf.compat.v2.saved_model.load('/home/guillefix/code/awo_testing3_old')
     # policy = tf.compat.v2.saved_model.load('/home/guillefix/code/awo_testing4')

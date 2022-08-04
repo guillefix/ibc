@@ -72,7 +72,7 @@ model = SentenceTransformer('all-MiniLM-L6-v2')
 
 root_folder = "/home/guillefix/code/inria/UR5_processed/"
 filenames=[x[:-1] for x in open("/home/guillefix/code/inria/UR5_processed/base_filenames_single_objs_filtered.txt","r").readlines()]
-filenames = filenames[:1]
+# filenames = filenames[:1]
 
 filename = filenames[0]
 import json
@@ -164,14 +164,15 @@ serialized_features_dataset = tf.data.Dataset.from_generator(
 #%%
 from tf_agents.utils import example_encoding_dataset
 import pickle
-# num_shards = 10
-num_shards = 1
+num_shards = 10
+# num_shards = 1
 for i in range(0,num_shards):
     dataset_shard = serialized_features_dataset.shard(num_shards=num_shards, index=i)
     # filename = 'data/UR5_single/tw_data_'+str(i)+'.tfrecord'
     # filename = 'data/UR5_single_smol/tw_data_'+str(i)+'.tfrecord'
     # filename = 'data/UR5_single_smollest/tw_data_'+str(i)+'.tfrecord'
-    filename = 'data/UR5_single_lang_smollest/tw_data_'+str(i)+'.tfrecord'
+    # filename = 'data/UR5_single_lang_smollest/tw_data_'+str(i)+'.tfrecord'
+    filename = 'data/UR5_single_lang/tw_data_'+str(i)+'.tfrecord'
     spec_filename = filename + ".spec"
     # example_encoding_dataset.encode_spec_to_file(spec_filename, dataset_shard.element_spec)
     example_encoding_dataset.encode_spec_to_file(spec_filename, output_spec)
