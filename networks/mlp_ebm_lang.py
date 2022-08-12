@@ -110,10 +110,10 @@ class MLPEBMLang(network.Network):
     # print(obs)
     # import pdb; pdb.set_trace()
     inputs = obs['annotation'][:,0,:]
-    print(inputs == self._cached_inputs)
-    print(inputs)
-    print(self._cached_inputs)
-    if self._cached_latents is not None and self._cached_inputs is not None and inputs == self._cached_inputs:
+    #print(inputs == self._cached_inputs)
+    #print(inputs)
+    #print(self._cached_inputs)
+    if not training and self._cached_latents is not None and self._cached_inputs is not None and inputs == self._cached_inputs:
         print("found latents in cache")
         obs['annotation'] = self._cached_latents
     else:
