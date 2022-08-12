@@ -95,6 +95,9 @@ class MLPEBMLang(network.Network):
         kernel_initializer=kernel_initializer,
         bias_initializer=bias_initializer)
 
+    self._cached_inputs = None
+    self._cached_latents = None
+
 
   def call(self, inputs, training, step_type=(), network_state=()):
     # obs: dict of named obs_spec.
@@ -106,9 +109,19 @@ class MLPEBMLang(network.Network):
 
     # print(obs)
     # import pdb; pdb.set_trace()
-    latents = self._encoder(obs['annotation'][:,0,:]).last_hidden_state
-    # import pdb; pdb.set_trace()
-    obs['annotation'] = latents[:,-1:,:]
+    inputs = obs['annotation'][:,0,:]
+    print(inputs == self._cached_inputs)
+    print(inputs)
+    print(self._cached_inputs)
+    if self._cached_latents is not None and self._cached_inputs is not None and inputs == self._cached_inputs:
+        print("found latents in cache")
+        obs['annotation'] = self._cached_latents
+    else:
+        self._cached_inputs = inputs
+        latents = self._encoder(inputs).last_hidden_state
+        # import pdb; pdb.set_trace()
+        obs['annotation'] = latents[:,-1:,:]
+        self._cached_latents = obs['annotation']
 
     # Combine dict of observations to concatenated tensor. [B x T x obs_spec]
     # import pdb; pdb.set_trace()
