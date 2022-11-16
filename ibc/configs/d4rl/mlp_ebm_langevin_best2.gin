@@ -42,14 +42,17 @@ IbcPolicy.optimize_again = True
 IbcPolicy.inference_langevin_noise_scale = 0.5
 
 # Configs for cloning net.
-MLPEBM.layers = 'ResNetPreActivation'
-MLPEBM.width = 1024
-MLPEBM.depth = 12
+MLPEBMLang.layers = 'ResNetPreActivation'
+MLPEBMLang.width = 1024
+MLPEBMLang.depth = 12
+MLPEBMLang.lang_layers = 6
+MLPEBMLang.lang_heads = 8
+MLPEBMLang.lang_hidden = 512
 #MLPEBM.width = 512
 #MLPEBM.depth = 8
-MLPEBM.rate = 0.0
-MLPEBM.dense_layer_type = 'spectral_norm'
-MLPEBM.activation = 'relu'
+MLPEBMlang.rate = 0.0
+MLPEBMlang.dense_layer_type = 'spectral_norm'
+MLPEBMlang.activation = 'relu'
 ImplicitBCAgent.compute_mse = True
 ResNetLayer.normalizer = None
 

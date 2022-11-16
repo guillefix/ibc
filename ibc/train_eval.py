@@ -485,7 +485,6 @@ def main(_):
       add_time=FLAGS.add_time,
       viz_img=FLAGS.viz_img,
       skip_eval=FLAGS.skip_eval,
-      learning_rate=1e-4,
       decay_steps=FLAGS.decay_steps,
       decay_rate=FLAGS.decay_rate,
       shared_memory_eval=FLAGS.shared_memory_eval,

@@ -27,7 +27,6 @@ from collections import OrderedDict
 
 from transformers import AutoConfig, TFAutoModel
 #config = AutoConfig.from_pretrained('bert-base-uncased', vocab_size=73)
-config = AutoConfig.from_pretrained('bert-base-uncased', vocab_size=73, num_hidden_layers=6, num_attention_heads=8, hidden_size=512)
 
 
 # inputs = tokenizer("Hello, my dog is cute", return_tensors="tf")
@@ -51,6 +50,9 @@ class MLPEBMLang(network.Network):
                name='MLPEBM',
                activation='relu',
                layers='MLPDropout',
+               lang_layers=6,
+               lang_heads=8,
+               lang_hidden=512,
                kernel_initializer='normal',
                bias_initializer='normal',
                dense_layer_type='regular'):
@@ -84,6 +86,7 @@ class MLPEBMLang(network.Network):
 
     # tokenizer = BertTokenizer.from_pretrained("bert-base-uncased")
     #model = TFBertModel.from_pretrained("bert-base-uncased")
+    config = AutoConfig.from_pretrained('bert-base-uncased', vocab_size=73, num_hidden_layers=lang_layers, num_attention_heads=lang_heads, hidden_size=lang_hidden)
     model =  TFAutoModel.from_config(config)
     # self._tokenizer = tokenizer
     self._encoder = model
@@ -113,15 +116,19 @@ class MLPEBMLang(network.Network):
     #print(inputs == self._cached_inputs)
     #print(inputs)
     #print(self._cached_inputs)
-    if not training and self._cached_latents is not None and self._cached_inputs is not None and inputs == self._cached_inputs:
-        print("found latents in cache")
-        obs['annotation'] = self._cached_latents
-    else:
-        self._cached_inputs = inputs
-        latents = self._encoder(inputs).last_hidden_state
-        # import pdb; pdb.set_trace()
-        obs['annotation'] = latents[:,-1:,:]
-        self._cached_latents = obs['annotation']
+    must_compute_encoding=False
+    #if not training and self._cached_latents is not None and self._cached_inputs is not None and tf.math.reduce_all(tf.math.equal(inputs,self._cached_inputs)):
+    #    print("found latents in cache")
+    #    obs['annotation'] = self._cached_latents
+    #else:
+    #    self._cached_inputs = inputs
+    #    latents = self._encoder(inputs).last_hidden_state
+    #    # import pdb; pdb.set_trace()
+    #    obs['annotation'] = latents[:,-1:,:]
+    #    self._cached_latents = obs['annotation']
+    latents = self._encoder(inputs).last_hidden_state
+    # import pdb; pdb.set_trace()
+    obs['annotation'] = latents[:,-1:,:]
 
     # Combine dict of observations to concatenated tensor. [B x T x obs_spec]
     # import pdb; pdb.set_trace()
